@@ -12,9 +12,11 @@ import UIKit
 struct APICollection {
     typealias APIInstance = (name: String, impl: APIImplementation)
     typealias StreamAPIInstance = (name: String, impl: StreamAPIImplementation)
+    typealias PushStreamAPIInstance = (name: String, impl: PushStreamAPIImplementation)
     
     let apiList: [APIInstance]
     let streamAPIList: [StreamAPIInstance]
+    let pushStreamAPIList: [PushStreamAPIInstance]
 }
 
 
@@ -32,7 +34,8 @@ extension APICollection {
         return APICollection(apiList: [("dataMatrixScan", dataMatrixAPI),
                                        ("scanditScan", scanditScanAPI)],
                              streamAPIList: [("photoCaptureStream", photoCaptureStreamAPI),
-                                             ("pharmaLedgerCameraAPI", pharmaLedgerCameraAPI)])
+                                             ("pharmaLedgerCameraAPI", pharmaLedgerCameraAPI)],
+                             pushStreamAPIList: [("numbers", NumberPushStream())])
     }
 }
 

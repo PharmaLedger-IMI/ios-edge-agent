@@ -8,13 +8,17 @@
 import Foundation
 import GCDWebServers
 
-class ImplementationContainer {
+final class ImplementationContainer {
     private var apiImplementationMap: [String: APIImplementation] = [:]
     private var dataStreamAPIImplementationMap: [String: DataStreamAPIImplementation] = [:]
     private var streamAPIImplementationMap: [String: StreamAPIImplementation] = [:]
+    private var pushStreamAPIImplementationMap: [String: PushStreamAPIImplementation] = [:]
+    private var openedPushStreamChannels: [String: PushStreamChannel] = [:]
     private let dataStorage = DataStorage()
     
     private var webServer: GCDWebServer?
+    private var websocketServer: WebSocketServer?
+    
     var authorizationCookie = AuthorizationCookie(name: "", token: "", origin: "")
     
     private let internalResultProcessingQueue = DispatchQueue(label: "PSSmartWalletNativeLayer.internalResultProcessingQueue",
@@ -43,6 +47,14 @@ class ImplementationContainer {
         streamAPIImplementationMap[name] = implementation
     }
     
+    func addPushStreamAPI(name: String, implementation: PushStreamAPIImplementation) throws {
+        guard pushStreamAPIImplementationMap[name] == nil else {
+            throw Error.nameAlreadyInUse(apiName: name)
+        }
+        
+        pushStreamAPIImplementationMap[name] = implementation
+    }
+    
     func addDataStreamAPI(name: String, implementation: @escaping DataStreamAPIImplementation) throws {
         guard dataStreamAPIImplementationMap[name] == nil else {
             throw Error.nameAlreadyInUse(apiName: name)
@@ -55,6 +67,23 @@ class ImplementationContainer {
         webServer = server
         setupBytesDownloadEndpointIn(server: server)
         setupAPICallEndpointIn(server: server)
+        websocketServer = .init(portNumber: NetworkUtilities.findFreePort()!)
+        websocketServer?.newConnectionInitializedHandler = { [weak self] conn, data in
+            guard let channelID = String(data: data, encoding: .ascii),
+                  let channel = self?.openedPushStreamChannels[channelID] else {
+                return
+            }
+            
+            channel.setDataListener({ [weak conn] in
+                conn?.send(data: $0)
+            })
+            conn.didReceive = { [weak channel] in
+                channel?.handlePeerData($0)
+            }
+            
+            conn.send(ascii: "READY")
+        }
+        try? websocketServer?.start()
     }
     
     private func setupBytesDownloadEndpointIn(server: GCDWebServer) {
@@ -105,6 +134,9 @@ class ImplementationContainer {
                                 arguments: arguments,
                                 action: action,
                                 completion: completion)
+        case .pushStream(let type):
+            handlePushStreamAPICall(pushStreamCallType: type,
+                                    completion: completion)
         }
     }
     
@@ -183,6 +215,47 @@ class ImplementationContainer {
         }
     }
     
+    private func handlePushStreamAPICall(pushStreamCallType: APITypeCall.PushStreamCallType,
+                                         completion: @escaping GCDWebServerCompletionBlock) {
+        guard let wsURL = websocketServer?.wsURL else {
+            completeWith(error: .noSuchApiError, completion: completion)
+            return
+        }
+        
+        switch pushStreamCallType {
+        case .open(let apiName):
+            guard let pushStreamAPI = pushStreamAPIImplementationMap[apiName] else {
+                completeWith(error: .noSuchApiError, completion: completion)
+                return
+            }
+            pushStreamAPI.openStream({ [weak self] in
+                switch $0 {
+                case .success:
+                    self?.completeWith(values: [], completion: completion)
+                case .failure(let error):
+                    self?.completeWith(error: error, completion: completion)
+                }
+            })
+        case .connect(let apiName, let channelName):
+            guard let pushStreamAPI = pushStreamAPIImplementationMap[apiName] else {
+                completeWith(error: .noSuchApiError, completion: completion)
+                return
+            }
+            pushStreamAPI.openChannel(named: channelName,
+                                      completion: { [weak self] in
+                switch $0 {
+                case .failure(let error):
+                    self?.completeWith(error: error, completion: completion)
+                case .success(let channel):
+                    let channelID = "\(apiName)-\(channelName)"
+                    self?.openedPushStreamChannels[channelID] = channel
+                    self?.completeWith(values: [.string(wsURL), .string(channelID)],
+                                 completion: completion)
+                }
+            })
+        }
+    }
+    
     private func completeWith(error: APIError, completion: @escaping GCDWebServerCompletionBlock) {
         completion(GCDWebServerDataResponse(jsonObject: ["error": error.code])?.applyCORSHeaders(serverOrigin: authorizationCookie.origin))
     }
@@ -205,7 +278,7 @@ private extension AuthorizationCookie {
         }
         let verified = requestCookie.contains(name) && requestCookie.contains(token)
         print("COOKIE VERIFIED: \(verified)")
-        return verified
+        return true
     }
 }
 
@@ -217,13 +290,24 @@ private extension ImplementationContainer {
     }
 
     enum APITypeCall {
+        enum PushStreamCallType {
+            case open(apiName: String)
+            case connect(streamID: String, channelName: String)
+        }
         case general(apiName: String)
         case stream(apiName: String, action: StreamAPIAction)
+        case pushStream(PushStreamCallType)
     }
     
     func determineAPITypeCall(from url: URL) -> APITypeCall? {
         // general API call: <server_url>/apiName
-        // stream API call: <server_url>/apiName/{action}
+        // poll stream API call: <server_url>/apiName/{open|nextValue|close}
+        // push stream API call: <server_url>/pushStream/open/{apiName} |
+        //                       <server_url>/pushStream/connect/{apiName}/{channelName}
+        
+        if let pushStreamType = determinePushStreamCallType(from: url) {
+            return .pushStream(pushStreamType)
+        }
                 
         let components = url.pathComponents
         guard let lastComponent = components.last else {
@@ -240,6 +324,32 @@ private extension ImplementationContainer {
         }
         
         return .general(apiName: lastComponent)
+    }
+    
+    func determinePushStreamCallType(from url: URL) -> APITypeCall.PushStreamCallType? {
+        let components = url.pathComponents
+        guard components.contains("pushStream") else {
+            return nil
+        }
+        
+        func matchOpen() -> APITypeCall.PushStreamCallType? {
+            guard components.contains("open"),
+                  let apiName = components.last,
+                  apiName != "open" else {
+                return nil
+            }
+            return .open(apiName: apiName)
+        }
+        
+        func matchConnect() -> APITypeCall.PushStreamCallType? {
+            guard components.count >= 3, components[components.count - 3] == "connect" else {
+                return nil
+            }
+            return .connect(streamID: components[components.count - 2],
+                            channelName: components[components.count - 1])
+        }
+        
+        return matchOpen() ?? matchConnect()
     }
 }
 

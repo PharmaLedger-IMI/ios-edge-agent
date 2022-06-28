@@ -287,6 +287,88 @@ class NativeApiCall extends CallableObject {
 
 }
 
+class NativePushStreamChannel {
+    constructor(websocketURL, identifier) {
+        this.websocketURL = websocketURL;
+        this.identifier = identifier;
+    }
+    
+    connect() {
+        let socket = new WebSocket(this.websocketURL);
+        socket.binaryType = "arraybuffer";
+        let self = this;
+        self.socket = socket;
+        return new Promise((resolve, reject) => {
+            socket.onopen = (event) => {
+                socket.onmessage = (message) => {
+                    if(message.data == "READY") {
+                        socket.onmessage = (binaryMessageEvent) => {
+                            self.handleIncomingData(binaryMessageEvent);
+                        }
+                        resolve();
+                    } else {
+                        reject(message.data);
+                    }
+                };
+                socket.send(identifier);
+            };
+            
+            socket.onerror = (error) => {
+              reject(error);
+            };
+        });
+    }
+    
+    setNewEventHandler(handler) {
+        this.handler = handler;
+    }
+    
+    send(data) {
+        this.socket.send(data);
+    }
+    
+    handleIncomingData(event) {
+        if(this.handler) {
+            this.handler(event);
+        }
+    }
+}
+
+class NativePushStreamAPI {
+    constructor(origin, name) {
+        this.origin = origin;
+        this.apiName = name;
+        const openURL = `${origin}/pushStream/open/${name}`;
+        this.openCall = new NativeApiCall(openURL)
+    }
+    
+    openStream() {
+        let self = this;
+        return new Promise((resolve, reject) => {
+            self.openCall().then((resultArray) => {
+                resolve();
+            }, (error) => {
+                reject(error);
+            });
+        });
+    }
+    
+    openChannel(channelName) {
+        const openChannelURL = `${this.origin}/pushStream/connect/${this.apiName}/${channelName}`;
+        let openChannelCall = new NativeApiCall(openChannelURL);
+        return new Promise((resolve, reject) => {
+            openChannelCall().then((resultArray) => {
+                const wsURL = resultArray[0];
+                const wsID = resultArray[1];
+                const channel = new NativePushStreamChannel(wsURL, wsID);
+                channel.connect().then(resolve, reject);
+            }, (error) => {
+                reject(error);
+            });
+        });
+    }
+}
+
 class NativeStreamAPI {
     constructor(origin, name) {
         const baseURL = `${origin}/${name}`;
@@ -316,6 +398,7 @@ class PSSmartWalletNativeLayer {
     constructor(origin) {
         this.nativeAPIMap = {};
         this.nativeStreamAPIMap = {};
+        this.nativePushStreamAPIMap = {};
         this.origin = origin;
     }
 
@@ -329,6 +412,12 @@ class PSSmartWalletNativeLayer {
     importNativeStreamAPI(name) {
         const api = this.nativeStreamAPIMap[name] || new NativeStreamAPI(this.origin, name);
         this.nativeStreamAPIMap[name] = api;
+        return api;
+    }
+    
+    importNativePushStreamAPI(name) {
+        const api = this.nativePushStreamAPIMap[name] || new NativePushStreamAPI(this.origin, name);
+        this.nativePushStreamAPIMap[name] = api;
         return api;
     }
 }
@@ -370,4 +459,5 @@ window.opendsu_native_apis = {
             callback(undefined, connector);
         });
     }
-}
+};
+

@@ -72,3 +72,16 @@ public struct AuthorizationCookie {
         self.origin = origin
     }
 }
+
+//
+
+public protocol PushStreamChannel: AnyObject {
+    func setDataListener(_ listener: @escaping (Data) -> Void)
+    func handlePeerData(_ data: Data)
+    func close()
+}
+
+public protocol PushStreamAPIImplementation: AnyObject {
+    func openStream(_ completion: @escaping (Result<Void, APIError>) -> Void) 
+    func openChannel(named: String, completion: @escaping (Result<PushStreamChannel, APIError>) -> Void)
+}

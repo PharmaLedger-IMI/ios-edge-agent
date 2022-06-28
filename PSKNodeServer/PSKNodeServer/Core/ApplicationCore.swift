@@ -109,6 +109,10 @@ final class ApplicationCore {
                 try apiContainer.addStreamAPI(name: $0.name, implementation: $0.impl)
             }
             
+            try apiCollection.pushStreamAPIList.forEach {
+                try apiContainer.addPushStreamAPI(name: $0.name, implementation: $0.impl)
+            }
+            
             setupBackgroundListeners()
             return apiContainer
         } catch let error {

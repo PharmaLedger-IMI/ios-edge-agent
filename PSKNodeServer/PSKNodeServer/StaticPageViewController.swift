@@ -25,6 +25,29 @@ final class StaticPageViewController: UIViewController {
         apiContainer = try! ac.setupApiContainer(apiCollection: apiCollection,
                                                  webServer: webServer)
         setupDemoPage(apiPort: apiContainer!.port)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+            let url: URL = .init(string: "http://localhost:\(self.webServer.port)/web-app/")!
+            
+            self.loadSecureCookieThenRedirect(cookie: .init(name: "Cookiiie", token: "Tolkien", origin: "http://localhost:\(self.webServer.port)"), url: url)
+        })
+    }
+    
+    func loadSecureCookieThenRedirect(cookie: AuthorizationCookie,
+                                      url: URL) {
+        let webServerURL = URL(string: "http://localhost:\(webServer.port)/initialLoad")
+        ac.setSecurityCookie(cookie: cookie)
+        webServer.addHandler(forMethod: "GET",
+                                 path: "/initialLoad",
+                                 request: GCDWebServerRequest.classForCoder())
+        { (request, completion) in
+            let response = GCDWebServerResponse(redirect: url,
+                                                permanent: true)
+            response.setValue("\(cookie.name)=\(cookie.token); Max-Age=\(60*60*60*24)",
+                              forAdditionalHeader: "Set-Cookie")
+            completion(response)
+        }
+        webView.load(.init(url: webServerURL!))
     }
     
     private func setupDemoPage(apiPort: UInt) {
@@ -35,13 +58,9 @@ final class StaticPageViewController: UIViewController {
         }
         
         let basePath = "/web-app/"
-        webServer.addGETHandler(forBasePath: basePath, directoryPath: webAppDirectory, indexFilename: "native-streaming.html", cacheAge: 3500, allowRangeRequests: true);
+        webServer.addGETHandler(forBasePath: basePath, directoryPath: webAppDirectory, indexFilename: "index", cacheAge: 3500, allowRangeRequests: true);
         
         webServer.start()
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-            self.webView.load(.init(url: .init(string: "http://localhost:\(self.webServer.port)/web-app/")!))
-        })
     }
     ///
 }
