@@ -27,7 +27,7 @@ final class StaticPageViewController: UIViewController {
         setupDemoPage(apiPort: apiContainer!.port)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-            let url: URL = .init(string: "http://localhost:\(self.webServer.port)/web-app/")!
+            let url: URL = .init(string: "http://localhost:\(self.webServer.port)/web-app/index.html")!
             
             self.loadSecureCookieThenRedirect(cookie: .init(name: "Cookiiie", token: "Tolkien", origin: "http://localhost:\(self.webServer.port)"), url: url)
         })

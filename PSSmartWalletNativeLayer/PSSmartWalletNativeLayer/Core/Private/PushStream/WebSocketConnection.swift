@@ -31,12 +31,20 @@ final class WebSocketConnection {
     private func stateDidChange(to state: NWConnection.State) {
         switch state {
         case .waiting(let error):
+            print("connection - waiting \(error)")
             connectionDidFail(error: error)
         case .ready:
             print("connection \(apiName) - \(channelName) ready")
         case .failed(let error):
+            print("connection - failed \(error)")
             connectionDidFail(error: error)
-        default:
+        case .setup:
+            print("connection - setup")
+        case .preparing:
+            print("connection - preparing")
+        case .cancelled:
+            print("connection - cancelled")
+        @unknown default:
             break
         }
     }
@@ -73,7 +81,7 @@ final class WebSocketConnection {
     
     func send(ascii: String) {
         connection.send(content: ascii.data(using: .ascii)!,
-                        contentContext: dataContext,
+                        contentContext: textContext,
                         isComplete: true,
                         completion: .contentProcessed( { [weak self] error in
             guard let self = self else { return }

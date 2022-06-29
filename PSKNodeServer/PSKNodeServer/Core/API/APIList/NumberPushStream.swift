@@ -23,6 +23,13 @@ private extension NumberPushStream {
     final class MainChannel: PushStreamChannel {
         var dataListener: ((Data) -> Void)?
         var timer: Timer?
+        let dataPtr = UnsafeMutableBufferPointer<Int32>.allocate(capacity: 1)
+        var data = Data()
+        
+        func updateData() {
+            data.replaceSubrange(data.startIndex..<data.endIndex, with: .init(dataPtr))
+        }
+        
         func setDataListener(_ listener: @escaping (Data) -> Void) {
             dataListener = listener
             launchNewStream()
@@ -37,13 +44,18 @@ private extension NumberPushStream {
         }
         
         func launchNewStream() {
-            var value = 0;
+            var value: Int32 = 0;
             timer?.invalidate()
-            timer = Timer.scheduledTimer(withTimeInterval: 0.25,
+            timer = Timer.scheduledTimer(withTimeInterval: 1.25,
                                          repeats: true,
                                          block: { [weak self] _ in
+                guard let welf = self else {
+                    return
+                }
                 value += 1
-                self?.dataListener?("\(value)".data(using: .ascii)!)
+                welf.dataPtr[0] = value
+                welf.updateData()
+                self?.dataListener?(welf.data)
             })
         }
     }
