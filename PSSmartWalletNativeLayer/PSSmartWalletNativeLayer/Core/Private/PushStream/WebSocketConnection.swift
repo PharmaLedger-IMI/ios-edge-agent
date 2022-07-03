@@ -66,10 +66,10 @@ final class WebSocketConnection {
         didReceive?(data)
     }
 
-    func send(data: Data) {
+    func send(data: Data, isComplete: Bool) {
         connection.send(content: data,
                         contentContext: dataContext,
-                        isComplete: true,
+                        isComplete: isComplete,
                         completion: .contentProcessed( { [weak self] error in
             guard let self = self else { return }
             if let error = error {
@@ -79,10 +79,10 @@ final class WebSocketConnection {
         }))
     }
     
-    func send(ascii: String) {
+    func send(ascii: String, isComplete: Bool) {
         connection.send(content: ascii.data(using: .ascii)!,
                         contentContext: textContext,
-                        isComplete: true,
+                        isComplete: isComplete,
                         completion: .contentProcessed( { [weak self] error in
             guard let self = self else { return }
             if let error = error {

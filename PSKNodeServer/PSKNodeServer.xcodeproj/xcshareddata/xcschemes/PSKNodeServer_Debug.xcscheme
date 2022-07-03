@@ -20,6 +20,20 @@
                ReferencedContainer = "container:PSKNodeServer.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "0B003A272540B723006A66C1"
+               BuildableName = "PSSmartWalletNativeLayer.framework"
+               BlueprintName = "PSSmartWalletNativeLayer"
+               ReferencedContainer = "container:../PSSmartWalletNativeLayer/PSSmartWalletNativeLayer.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

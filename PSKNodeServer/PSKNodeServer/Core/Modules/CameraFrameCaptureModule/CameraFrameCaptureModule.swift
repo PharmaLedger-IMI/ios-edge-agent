@@ -48,10 +48,13 @@ extension CameraFrameCaptureModule: CameraFrameCaptureModuleInput {
         exitHandler?()
     }
     
-    func captureNextFrame(handler: @escaping (Result<CVImageBuffer, CameraFrameCapture.FrameCaptureError>) -> Void) {
+    func setCaptureFrameHandler(handler: @escaping (Result<CVImageBuffer, CameraFrameCapture.FrameCaptureError>) -> Void,
+                                isContinuous: Bool) {
         output.setSampleBufferDelegate(self, queue: .main)
         photoCaptureCompletion = { [weak self] in
-            self?.output.setSampleBufferDelegate(nil, queue: nil)
+            if !isContinuous {
+                self?.output.setSampleBufferDelegate(nil, queue: nil)
+            }
             handler(.success($0))
         }
     }

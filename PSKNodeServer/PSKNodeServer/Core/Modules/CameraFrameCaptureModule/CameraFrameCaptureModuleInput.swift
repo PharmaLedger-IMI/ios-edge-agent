@@ -31,5 +31,6 @@ enum CameraFrameCapture {
 
 protocol CameraFrameCaptureModuleInput {
     func cancelFrameCapture()
-    func captureNextFrame(handler: @escaping CameraFrameCapture.CapturedFrameHandler)
+    func setCaptureFrameHandler(handler: @escaping CameraFrameCapture.CapturedFrameHandler,
+                                isContinuous: Bool)
 }

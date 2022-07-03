@@ -9,17 +9,6 @@ import PSSmartWalletNativeLayer
 import CoreVideo
 
 final class PhotoCaptureStreamAPI {
-    enum CaptureType: String, Decodable {
-        case jpegBase64
-        case rgba
-        case bgra
-    }
-    
-    struct CaptureOptions: Decodable {
-        let captureType: CaptureType
-        static let defaultOptions = Self(captureType: .jpegBase64)
-    }
-    
     typealias ViewControllerProvider = DataMatrixScanAPI.ViewControllerProvider
     private let frameCaptureModuleBuilder: CameraFrameCaptureModuleBuildable
     private var frameCaptureModuleInput: CameraFrameCaptureModuleInput?
@@ -32,7 +21,7 @@ final class PhotoCaptureStreamAPI {
 
 extension PhotoCaptureStreamAPI: StreamAPIImplementation {
     func openStream(input: [APIValue], completion: @escaping (Result<Void, APIError>) -> Void) {
-        options = retrieveOptionsFrom(input: input) ?? .defaultOptions
+        options = .init(apiValue: input.first) ?? .defaultOptions
         
         let pixelFormat: CameraFrameCapture.PixelFormat = {
             switch options.captureType {
@@ -76,23 +65,8 @@ extension PhotoCaptureStreamAPI: StreamAPIImplementation {
 }
 
 private extension PhotoCaptureStreamAPI {
-    func retrieveOptionsFrom(input: [APIValue]) -> CaptureOptions? {
-        guard case .string(let json) = input.first,
-              let data = json.data(using: .ascii) else {
-                  return nil
-              }
-        
-        do {
-            return try JSONDecoder().decode(CaptureOptions.self, from: data)
-        } catch let error {
-            print("Error: \(error)")
-        }
-         
-        return nil
-    }
-    
     func retrieveBase64JPEG(into: @escaping (Result<[APIValue], APIError>) -> Void) {
-        frameCaptureModuleInput?.captureNextFrame(handler: {
+        frameCaptureModuleInput?.setCaptureFrameHandler(handler: {
             switch $0 {
             case .success(let buffer):
                 guard let jpegData = buffer.asUIImage?.jpegData(compressionQuality: 1.0) else {
@@ -103,12 +77,12 @@ private extension PhotoCaptureStreamAPI {
             case .failure(let error):
                 into(.failure(.init(code: error.code)))
             }
-        })
+        }, isContinuous: false)
     }
     
     func retrieveBGRAFrame(into: @escaping (Result<[APIValue], APIError>) -> Void,
                            bufferProcessing: @escaping (CVImageBuffer) -> UnsafeMutableRawPointer?) {
-        frameCaptureModuleInput?.captureNextFrame(handler: {
+        frameCaptureModuleInput?.setCaptureFrameHandler(handler: {
             switch $0 {
             case .success(let imageBuffer):
                 guard let buffer = bufferProcessing(imageBuffer) else {
@@ -131,7 +105,7 @@ private extension PhotoCaptureStreamAPI {
             case .failure(let error):
                 into(.failure(.init(code: error.code)))
             }
-        })
+        }, isContinuous: false)
     }
 }
 

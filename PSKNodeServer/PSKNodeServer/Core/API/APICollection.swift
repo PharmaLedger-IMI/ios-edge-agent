@@ -29,13 +29,15 @@ extension APICollection {
         
         let scanditScanAPI = setupScanditScanAPI(viewControllerProvider: viewControllerProvider())
         let photoCaptureStreamAPI = setupPhotoCaptureStreamAPI()
+        let photoCapturePushStreamAPI = setupPhotoCapturePushStreamAPI()
         let pharmaLedgerCameraAPI = PLCameraAPI(webServer: webServer)
         
         return APICollection(apiList: [("dataMatrixScan", dataMatrixAPI),
                                        ("scanditScan", scanditScanAPI)],
                              streamAPIList: [("photoCaptureStream", photoCaptureStreamAPI),
                                              ("pharmaLedgerCameraAPI", pharmaLedgerCameraAPI)],
-                             pushStreamAPIList: [("numbers", NumberPushStream())])
+                             pushStreamAPIList: [("numbers", NumberPushStream()),
+                                                 ("photoCapturePushStream", photoCapturePushStreamAPI)])
     }
 }
 
@@ -54,6 +56,10 @@ private extension APICollection {
     }
     
     static func setupPhotoCaptureStreamAPI() -> PhotoCaptureStreamAPI {
+        .init(frameCaptureModuleBuilder: CameraFrameCaptureModuleBuilder(videoCaptureSessionModuleBuilder: VideoCaptureSessionModuleBuilders.VideoCaptureSessionModuleBuilder()))
+    }
+    
+    static func setupPhotoCapturePushStreamAPI() -> PhotoCapturePushStreamAPI {
         .init(frameCaptureModuleBuilder: CameraFrameCaptureModuleBuilder(videoCaptureSessionModuleBuilder: VideoCaptureSessionModuleBuilders.VideoCaptureSessionModuleBuilder()))
     }
     

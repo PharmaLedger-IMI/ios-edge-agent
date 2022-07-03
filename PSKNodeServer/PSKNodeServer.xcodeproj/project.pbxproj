@@ -231,8 +231,6 @@
 		8AC08AA528285B0F0050B99B /* CameraScreenViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8A8832F9278C980300FFB63C /* CameraScreenViewController.xib */; };
 		8AC08AA628285B0F0050B99B /* CodeScannerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8AD5388127931DD100F28A81 /* CodeScannerViewController.xib */; };
 		8AC08AA728285B0F0050B99B /* ScannerAnimationView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8A883303278C980300FFB63C /* ScannerAnimationView.xib */; };
-		8AC08AAD28285B550050B99B /* PharmaLedgerCamera.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AC56D0227FE1D4B00B8C503 /* PharmaLedgerCamera.framework */; };
-		8AC08AAE28285B550050B99B /* PharmaLedgerCamera.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8AC56D0227FE1D4B00B8C503 /* PharmaLedgerCamera.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8AC08AAF28285B5A0050B99B /* PSSmartWalletNativeLayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AC56CFF27FE1D4300B8C503 /* PSSmartWalletNativeLayer.framework */; };
 		8AC08AB028285B5A0050B99B /* PSSmartWalletNativeLayer.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8AC56CFF27FE1D4300B8C503 /* PSSmartWalletNativeLayer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8AC0D077280725B500B66E05 /* StaticPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC0D076280725B500B66E05 /* StaticPageViewController.swift */; };
@@ -247,6 +245,17 @@
 		8AD538C227934C3200F28A81 /* CameraFrameCaptureModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD538C127934C3200F28A81 /* CameraFrameCaptureModule.swift */; };
 		8AE46F1D27B6CD7E0048B476 /* ImageConversionUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE46F1C27B6CD7E0048B476 /* ImageConversionUtilities.swift */; };
 		8AE46F1E27B6CD7E0048B476 /* ImageConversionUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE46F1C27B6CD7E0048B476 /* ImageConversionUtilities.swift */; };
+		8AFBAE312872220D006CF959 /* PhotoCaptureType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFBAE302872220D006CF959 /* PhotoCaptureType.swift */; };
+		8AFBAE322872220D006CF959 /* PhotoCaptureType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFBAE302872220D006CF959 /* PhotoCaptureType.swift */; };
+		8AFBAE332872220D006CF959 /* PhotoCaptureType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFBAE302872220D006CF959 /* PhotoCaptureType.swift */; };
+		8AFBAE3528722D33006CF959 /* PhotoCapturePushStreamAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFBAE3428722D33006CF959 /* PhotoCapturePushStreamAPI.swift */; };
+		8AFBAE3628722D33006CF959 /* PhotoCapturePushStreamAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFBAE3428722D33006CF959 /* PhotoCapturePushStreamAPI.swift */; };
+		8AFBAE3728722D33006CF959 /* PhotoCapturePushStreamAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFBAE3428722D33006CF959 /* PhotoCapturePushStreamAPI.swift */; };
+		8AFBAE38287233D4006CF959 /* PharmaLedgerCamera.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AC1D99327B2FB9000826E3F /* PharmaLedgerCamera.xcframework */; };
+		8AFBAE39287233D4006CF959 /* PharmaLedgerCamera.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8AC1D99327B2FB9000826E3F /* PharmaLedgerCamera.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8AFBAE3B2872384D006CF959 /* Data+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFBAE3A2872384D006CF959 /* Data+Utilities.swift */; };
+		8AFBAE3C2872384D006CF959 /* Data+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFBAE3A2872384D006CF959 /* Data+Utilities.swift */; };
+		8AFBAE3D2872384D006CF959 /* Data+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFBAE3A2872384D006CF959 /* Data+Utilities.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -302,7 +311,7 @@
 				8AC08A9528285B0F0050B99B /* ScanditParser.xcframework in Embed Frameworks */,
 				8AC08A9628285B0F0050B99B /* NodeMobile.xcframework in Embed Frameworks */,
 				8AC08A9728285B0F0050B99B /* ScanditIdCapture.xcframework in Embed Frameworks */,
-				8AC08AAE28285B550050B99B /* PharmaLedgerCamera.framework in Embed Frameworks */,
+				8AFBAE39287233D4006CF959 /* PharmaLedgerCamera.xcframework in Embed Frameworks */,
 				8AC08AB028285B5A0050B99B /* PSSmartWalletNativeLayer.framework in Embed Frameworks */,
 				8AC08A9928285B0F0050B99B /* ScanditBarcodeCapture.xcframework in Embed Frameworks */,
 				8AC08A9B28285B0F0050B99B /* ScanditTextCapture.xcframework in Embed Frameworks */,
@@ -399,6 +408,9 @@
 		8AD5388227931DD100F28A81 /* CodeScannerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodeScannerViewController.swift; sourceTree = "<group>"; };
 		8AD538C127934C3200F28A81 /* CameraFrameCaptureModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFrameCaptureModule.swift; sourceTree = "<group>"; };
 		8AE46F1C27B6CD7E0048B476 /* ImageConversionUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageConversionUtilities.swift; sourceTree = "<group>"; };
+		8AFBAE302872220D006CF959 /* PhotoCaptureType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureType.swift; sourceTree = "<group>"; };
+		8AFBAE3428722D33006CF959 /* PhotoCapturePushStreamAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCapturePushStreamAPI.swift; sourceTree = "<group>"; };
+		8AFBAE3A2872384D006CF959 /* Data+Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Utilities.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -446,7 +458,7 @@
 				8AC08A8A28285B0F0050B99B /* ScanditParser.xcframework in Frameworks */,
 				8AC08A8B28285B0F0050B99B /* NodeMobile.xcframework in Frameworks */,
 				8AC08A8C28285B0F0050B99B /* ScanditIdCapture.xcframework in Frameworks */,
-				8AC08AAD28285B550050B99B /* PharmaLedgerCamera.framework in Frameworks */,
+				8AFBAE38287233D4006CF959 /* PharmaLedgerCamera.xcframework in Frameworks */,
 				8AC08AAF28285B5A0050B99B /* PSSmartWalletNativeLayer.framework in Frameworks */,
 				8AC08A8E28285B0F0050B99B /* ScanditBarcodeCapture.xcframework in Frameworks */,
 				8AC08A9028285B0F0050B99B /* ScanditTextCapture.xcframework in Frameworks */,
@@ -518,6 +530,7 @@
 				8A883311278C998A00FFB63C /* Definitions.swift */,
 				8AD5387E2793144F00F28A81 /* ArrayUtilities.swift */,
 				8AE46F1C27B6CD7E0048B476 /* ImageConversionUtilities.swift */,
+				8AFBAE3A2872384D006CF959 /* Data+Utilities.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -701,11 +714,13 @@
 		8A88D8FA278F6CCA0053C712 /* APIList */ = {
 			isa = PBXGroup;
 			children = (
+				8AFBAE2F287221DF006CF959 /* PhotoAPICommon */,
 				8A8832EB278C976700FFB63C /* DataMatrixScan.swift */,
 				8A171D06279464C600A302BE /* PhotoCaptureStreamAPI.swift */,
 				8A8C318327AB1163001B63BC /* ScanditScanAPI.swift */,
 				8A83323227DE41B400D6FA64 /* PLCameraAPI.swift */,
 				8A5AE9EC286BB614008FE41C /* NumberPushStream.swift */,
+				8AFBAE3428722D33006CF959 /* PhotoCapturePushStreamAPI.swift */,
 			);
 			path = APIList;
 			sourceTree = "<group>";
@@ -738,6 +753,14 @@
 				8A84B45C27973DD70063355C /* CameraFrameCapturePreviewModuleBuilder.swift */,
 			);
 			path = CameraFrameCaptureModule;
+			sourceTree = "<group>";
+		};
+		8AFBAE2F287221DF006CF959 /* PhotoAPICommon */ = {
+			isa = PBXGroup;
+			children = (
+				8AFBAE302872220D006CF959 /* PhotoCaptureType.swift */,
+			);
+			path = PhotoAPICommon;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -899,6 +922,7 @@
 			files = (
 				8A883312278C998A00FFB63C /* Definitions.swift in Sources */,
 				8A171D07279464C600A302BE /* PhotoCaptureStreamAPI.swift in Sources */,
+				8AFBAE3528722D33006CF959 /* PhotoCapturePushStreamAPI.swift in Sources */,
 				8A88330C278C980300FFB63C /* MaskView.swift in Sources */,
 				0BCFE0A725AD9BCE003F7BC2 /* UIAlertController+Extensions.swift in Sources */,
 				8A7AC8902795F3D5003D4A0B /* CameraMetadataScanModuleBuilder.swift in Sources */,
@@ -911,10 +935,12 @@
 				8AD538C227934C3200F28A81 /* CameraFrameCaptureModule.swift in Sources */,
 				8A88331E278CCF6B00FFB63C /* CameraMetadataScanModule.swift in Sources */,
 				8A883309278C980300FFB63C /* LineAnimationView.swift in Sources */,
+				8AFBAE312872220D006CF959 /* PhotoCaptureType.swift in Sources */,
 				8A883306278C980300FFB63C /* CodeScannerSoundFile.swift in Sources */,
 				8A883319278CCA1400FFB63C /* CameraScreenModuleBuilder.swift in Sources */,
 				8A83323327DE41B400D6FA64 /* PLCameraAPI.swift in Sources */,
 				8AE46F1D27B6CD7E0048B476 /* ImageConversionUtilities.swift in Sources */,
+				8AFBAE3B2872384D006CF959 /* Data+Utilities.swift in Sources */,
 				8A8C318427AB1163001B63BC /* ScanditScanAPI.swift in Sources */,
 				0B2F95732593F9D600983BEE /* AppDelegate.swift in Sources */,
 				8AA1B54627A9E9EF00A1D454 /* ScanditError.swift in Sources */,
@@ -954,6 +980,7 @@
 			files = (
 				8A83E3FD27A861D000176C53 /* Definitions.swift in Sources */,
 				8A83E3FE27A861D000176C53 /* PhotoCaptureStreamAPI.swift in Sources */,
+				8AFBAE3628722D33006CF959 /* PhotoCapturePushStreamAPI.swift in Sources */,
 				8A83E3FF27A861D000176C53 /* MaskView.swift in Sources */,
 				8A83E40027A861D000176C53 /* UIAlertController+Extensions.swift in Sources */,
 				8A83E40127A861D000176C53 /* CameraMetadataScanModuleBuilder.swift in Sources */,
@@ -966,10 +993,12 @@
 				8A83E40827A861D000176C53 /* CameraFrameCaptureModule.swift in Sources */,
 				8A83E40927A861D000176C53 /* CameraMetadataScanModule.swift in Sources */,
 				8A83E40A27A861D000176C53 /* LineAnimationView.swift in Sources */,
+				8AFBAE322872220D006CF959 /* PhotoCaptureType.swift in Sources */,
 				8A83E40B27A861D000176C53 /* CodeScannerSoundFile.swift in Sources */,
 				8A83E40C27A861D000176C53 /* CameraScreenModuleBuilder.swift in Sources */,
 				8A7EAD3027E1F02B00D37FD2 /* PLCameraAPI.swift in Sources */,
 				8AE46F1E27B6CD7E0048B476 /* ImageConversionUtilities.swift in Sources */,
+				8AFBAE3C2872384D006CF959 /* Data+Utilities.swift in Sources */,
 				8A8C318527AB1530001B63BC /* ScanditScanAPI.swift in Sources */,
 				8A83E40D27A861D000176C53 /* AppDelegate.swift in Sources */,
 				8AA1B54727A9E9EF00A1D454 /* ScanditError.swift in Sources */,
@@ -1009,6 +1038,7 @@
 			files = (
 				8AC08A5628285B0F0050B99B /* Definitions.swift in Sources */,
 				8AC08A5728285B0F0050B99B /* PhotoCaptureStreamAPI.swift in Sources */,
+				8AFBAE3728722D33006CF959 /* PhotoCapturePushStreamAPI.swift in Sources */,
 				8AC08A5828285B0F0050B99B /* MaskView.swift in Sources */,
 				8AC08A5928285B0F0050B99B /* UIAlertController+Extensions.swift in Sources */,
 				8AC08A5A28285B0F0050B99B /* CameraMetadataScanModuleBuilder.swift in Sources */,
@@ -1021,10 +1051,12 @@
 				8AC08A6128285B0F0050B99B /* CameraFrameCaptureModule.swift in Sources */,
 				8AC08A6228285B0F0050B99B /* CameraMetadataScanModule.swift in Sources */,
 				8AC08A6328285B0F0050B99B /* LineAnimationView.swift in Sources */,
+				8AFBAE332872220D006CF959 /* PhotoCaptureType.swift in Sources */,
 				8AC08A6428285B0F0050B99B /* CodeScannerSoundFile.swift in Sources */,
 				8AC08A6528285B0F0050B99B /* CameraScreenModuleBuilder.swift in Sources */,
 				8AC08A6628285B0F0050B99B /* PLCameraAPI.swift in Sources */,
 				8AC08A6728285B0F0050B99B /* ImageConversionUtilities.swift in Sources */,
+				8AFBAE3D2872384D006CF959 /* Data+Utilities.swift in Sources */,
 				8AC08A6828285B0F0050B99B /* ScanditScanAPI.swift in Sources */,
 				8AC08A6928285B0F0050B99B /* AppDelegate.swift in Sources */,
 				8AC08A6A28285B0F0050B99B /* ScanditError.swift in Sources */,

@@ -75,13 +75,13 @@ final class ImplementationContainer {
             }
             
             channel.setDataListener({ [weak conn] in
-                conn?.send(data: $0)
+                conn?.send(data: $0, isComplete: $1)
             })
             conn.didReceive = { [weak channel] in
                 channel?.handlePeerData($0)
             }
             
-            conn.send(ascii: "READY")
+            conn.send(ascii: "READY", isComplete: true)
         }
         try? websocketServer?.start()
     }
@@ -136,6 +136,7 @@ final class ImplementationContainer {
                                 completion: completion)
         case .pushStream(let type):
             handlePushStreamAPICall(pushStreamCallType: type,
+                                    arguments: arguments,
                                     completion: completion)
         }
     }
@@ -216,6 +217,7 @@ final class ImplementationContainer {
     }
     
     private func handlePushStreamAPICall(pushStreamCallType: APITypeCall.PushStreamCallType,
+                                         arguments: [APIValue],
                                          completion: @escaping GCDWebServerCompletionBlock) {
         guard let wsURL = websocketServer?.wsURL else {
             completeWith(error: .noSuchApiError, completion: completion)
@@ -228,7 +230,7 @@ final class ImplementationContainer {
                 completeWith(error: .noSuchApiError, completion: completion)
                 return
             }
-            pushStreamAPI.openStream({ [weak self] in
+            pushStreamAPI.openStream(input: arguments, { [weak self] in
                 switch $0 {
                 case .success:
                     self?.completeWith(values: [], completion: completion)
@@ -241,7 +243,8 @@ final class ImplementationContainer {
                 completeWith(error: .noSuchApiError, completion: completion)
                 return
             }
-            pushStreamAPI.openChannel(named: channelName,
+            pushStreamAPI.openChannel(input: arguments,
+                                      named: channelName,
                                       completion: { [weak self] in
                 switch $0 {
                 case .failure(let error):

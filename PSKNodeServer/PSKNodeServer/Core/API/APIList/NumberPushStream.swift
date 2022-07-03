@@ -10,18 +10,18 @@ import PSSmartWalletNativeLayer
 
 final class NumberPushStream: PushStreamAPIImplementation {
     private let channel = MainChannel()
-    func openStream(_ completion: @escaping (Result<Void, APIError>) -> Void) {
+    func openStream(input options: [APIValue], _ completion: @escaping (Result<Void, APIError>) -> Void) {
         completion(.success(()))
     }
     
-    func openChannel(named: String, completion: @escaping (Result<PushStreamChannel, APIError>) -> Void) {
+    func openChannel(input options: [APIValue], named: String, completion: @escaping (Result<PushStreamChannel, APIError>) -> Void) {
         completion(.success(channel))
     }
 }
 
 private extension NumberPushStream {
     final class MainChannel: PushStreamChannel {
-        var dataListener: ((Data) -> Void)?
+        var dataListener: PushStreamChannelDataListener?
         var timer: Timer?
         let dataPtr = UnsafeMutableBufferPointer<Int32>.allocate(capacity: 1)
         var data = Data()
@@ -30,7 +30,7 @@ private extension NumberPushStream {
             data.replaceSubrange(data.startIndex..<data.endIndex, with: .init(dataPtr))
         }
         
-        func setDataListener(_ listener: @escaping (Data) -> Void) {
+        func setDataListener(_ listener: @escaping PushStreamChannelDataListener) {
             dataListener = listener
             launchNewStream()
         }
@@ -55,7 +55,7 @@ private extension NumberPushStream {
                 value += 1
                 welf.dataPtr[0] = value
                 welf.updateData()
-                self?.dataListener?(welf.data)
+                self?.dataListener?(welf.data, true)
             })
         }
     }
