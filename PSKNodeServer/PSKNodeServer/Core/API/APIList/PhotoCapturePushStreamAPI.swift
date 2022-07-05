@@ -13,7 +13,7 @@ final class PhotoCapturePushStreamAPI {
     private let frameCaptureModuleBuilder: CameraFrameCaptureModuleBuildable
     private var frameCaptureModuleInput: CameraFrameCaptureModuleInput?
     private var mainChannel: MainChannel?
-    private var options: CaptureOptions = .defaultOptions
+    private var options: CaptureOptions = .init(captureType: .rgba)
     init(frameCaptureModuleBuilder: CameraFrameCaptureModuleBuildable) {
         self.frameCaptureModuleBuilder = frameCaptureModuleBuilder
     }
@@ -32,7 +32,7 @@ extension PhotoCapturePushStreamAPI: PushStreamAPIImplementation {
     }
     
     func openStream(input: [APIValue], _ completion: @escaping (Result<Void, APIError>) -> Void) {
-        options = .init(apiValue: input.first) ?? .defaultOptions
+        options = .init(apiValue: input.first) ?? .init(captureType: .bgra)
         
         let pixelFormat: CameraFrameCapture.PixelFormat = {
             switch options.captureType {
@@ -55,51 +55,6 @@ extension PhotoCapturePushStreamAPI: PushStreamAPIImplementation {
                 }
             })
         })
-    }
-}
-
-private extension PhotoCapturePushStreamAPI {
-    func retrieveBase64JPEG(into: @escaping (Result<[APIValue], APIError>) -> Void) {
-        frameCaptureModuleInput?.setCaptureFrameHandler(handler: {
-            switch $0 {
-            case .success(let buffer):
-                guard let jpegData = buffer.asUIImage?.jpegData(compressionQuality: 1.0) else {
-                    into(.failure(.init(code: CameraFrameCapture.FrameCaptureError.frameCaptureFailure(nil).code)))
-                    return
-                }
-                into(.success([.string("data:image/jpeg;base64," + jpegData.base64EncodedString())]))
-            case .failure(let error):
-                into(.failure(.init(code: error.code)))
-            }
-        }, isContinuous: true)
-    }
-    
-    func retrieveBGRAFrame(into: @escaping (Result<[APIValue], APIError>) -> Void,
-                           bufferProcessing: @escaping (CVImageBuffer) -> UnsafeMutableRawPointer?) {
-        frameCaptureModuleInput?.setCaptureFrameHandler(handler: {
-            switch $0 {
-            case .success(let imageBuffer):
-                guard let buffer = bufferProcessing(imageBuffer) else {
-                    into(.failure(.init(code: CameraFrameCapture
-                                            .FrameCaptureError
-                                            .frameCaptureFailure(nil)
-                                            .code
-                                       )))
-                    return
-                }
-                
-                let data = Data(bytesNoCopy: buffer,
-                                count: imageBuffer.byteCount,
-                                deallocator: .free)
-                
-                into(.success([.bytes(data),
-                               .number(Double(imageBuffer.rgba8888Width)),
-                               .number(Double(imageBuffer.height))]))
-                
-            case .failure(let error):
-                into(.failure(.init(code: error.code)))
-            }
-        }, isContinuous: true)
     }
 }
 
@@ -153,24 +108,28 @@ private extension PhotoCapturePushStreamAPI {
         }
         
         private func beginRetrievingBGRAFrames(bufferProcessing: @escaping (CVImageBuffer) -> UnsafeMutableRawPointer?) {
+            var count = 0
             frameCaptureModuleInput.setCaptureFrameHandler(handler: { [weak self] in
                 switch $0 {
                 case .success(let imageBuffer):
-                    guard let buffer = bufferProcessing(imageBuffer) else {
+                    guard count > 10,
+                          let buffer = bufferProcessing(imageBuffer) else {
 //                        into(.failure(.init(code: CameraFrameCapture
 //                                                .FrameCaptureError
 //                                                .frameCaptureFailure(nil)
 //                                                .code
 //                                           )))
+                        count += 1
                         return
                     }
                     
+                    count = 0
                     let data = Data(bytesNoCopy: buffer,
                                     count: imageBuffer.byteCount,
                                     deallocator: .free)
                     
-                    self?.dataListener?(.from(intValue: imageBuffer.rgba8888Width), false)
-                    self?.dataListener?(.from(intValue: imageBuffer.height), false)
+                    self?.dataListener?(.from(value: Int32(imageBuffer.rgba8888Width)), false)
+                    self?.dataListener?(.from(value: Int32(imageBuffer.height)), false)
                     self?.dataListener?(data, true)
                 case .failure(let error):
 //                    into(.failure(.init(code: error.code)))

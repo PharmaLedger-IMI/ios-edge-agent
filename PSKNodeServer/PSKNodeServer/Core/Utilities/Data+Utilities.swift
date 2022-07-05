@@ -8,9 +8,9 @@
 import Foundation
 
 extension Data {
-    static func from(intValue: Int) -> Data {
-        withUnsafePointer(to: intValue, { ptr in
-            return Data(bytes: .init(ptr), count: MemoryLayout<Int>.stride)
+    static func from<T>(value: T) -> Data {
+        withUnsafePointer(to: value, { ptr in
+            return Data(bytes: .init(ptr), count: MemoryLayout<T>.stride)
         })
     }
 }
