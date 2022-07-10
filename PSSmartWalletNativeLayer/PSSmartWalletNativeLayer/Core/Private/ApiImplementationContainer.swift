@@ -225,6 +225,13 @@ final class ImplementationContainer {
         }
         
         switch pushStreamCallType {
+        case .close(let apiName):
+            guard let pushStreamAPI = pushStreamAPIImplementationMap[apiName] else {
+                completeWith(error: .noSuchApiError, completion: completion)
+                return
+            }
+            pushStreamAPI.close()
+            completeWith(values: [], completion: completion)
         case .open(let apiName):
             guard let pushStreamAPI = pushStreamAPIImplementationMap[apiName] else {
                 completeWith(error: .noSuchApiError, completion: completion)
@@ -295,6 +302,7 @@ private extension ImplementationContainer {
     enum APITypeCall {
         enum PushStreamCallType {
             case open(apiName: String)
+            case close(apiName: String)
             case connect(streamID: String, channelName: String)
         }
         case general(apiName: String)
@@ -306,6 +314,7 @@ private extension ImplementationContainer {
         // general API call: <server_url>/apiName
         // poll stream API call: <server_url>/apiName/{open|nextValue|close}
         // push stream API call: <server_url>/pushStream/open/{apiName} |
+        // push stream API call: <server_url>/pushStream/close/{apiName} |
         //                       <server_url>/pushStream/connect/{apiName}/{channelName}
         
         if let pushStreamType = determinePushStreamCallType(from: url) {
@@ -344,6 +353,15 @@ private extension ImplementationContainer {
             return .open(apiName: apiName)
         }
         
+        func matchClose() -> APITypeCall.PushStreamCallType? {
+            guard components.contains("close"),
+                  let apiName = components.last,
+                  apiName != "close" else {
+                return nil
+            }
+            return .close(apiName: apiName)
+        }
+        
         func matchConnect() -> APITypeCall.PushStreamCallType? {
             guard components.count >= 3, components[components.count - 3] == "connect" else {
                 return nil
@@ -352,7 +370,7 @@ private extension ImplementationContainer {
                             channelName: components[components.count - 1])
         }
         
-        return matchOpen() ?? matchConnect()
+        return matchOpen() ?? matchConnect() ?? matchClose()
     }
 }
 

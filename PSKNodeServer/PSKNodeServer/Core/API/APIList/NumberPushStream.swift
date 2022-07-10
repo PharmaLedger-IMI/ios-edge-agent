@@ -9,6 +9,10 @@ import Foundation
 import PSSmartWalletNativeLayer
 
 final class NumberPushStream: PushStreamAPIImplementation {
+    func close() {
+        
+    }
+    
     private let channel = MainChannel()
     func openStream(input options: [APIValue], _ completion: @escaping (Result<Void, APIError>) -> Void) {
         completion(.success(()))

@@ -84,4 +84,5 @@ public protocol PushStreamChannel: AnyObject {
 public protocol PushStreamAPIImplementation: AnyObject {
     func openStream(input: [APIValue], _ completion: @escaping (Result<Void, APIError>) -> Void)
     func openChannel(input: [APIValue], named: String, completion: @escaping (Result<PushStreamChannel, APIError>) -> Void)
+    func close()
 }

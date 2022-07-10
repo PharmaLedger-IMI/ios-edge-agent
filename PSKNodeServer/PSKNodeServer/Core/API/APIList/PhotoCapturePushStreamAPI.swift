@@ -66,6 +66,10 @@ extension PhotoCapturePushStreamAPI: PushStreamAPIImplementation {
             })
         })
     }
+    
+    func close() {
+        frameCaptureModuleInput?.cancelFrameCapture()
+    }
 }
 
 private extension PhotoCapturePushStreamAPI {
@@ -94,11 +98,11 @@ private extension PhotoCapturePushStreamAPI {
         }
         
         func handlePeerData(_ data: Data) {
-            
+            // unhandled here
         }
         
         func close() {
-            
+            timer?.invalidate()
         }
         
         private func beginRetrievingJPEGBase64() {

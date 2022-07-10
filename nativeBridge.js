@@ -305,12 +305,12 @@ class NativePushStreamChannel {
                         socket.onmessage = (binaryMessageEvent) => {
                             self.handleIncomingData(binaryMessageEvent);
                         }
-                        resolve();
+                        resolve(self);
                     } else {
                         reject(message.data);
                     }
                 };
-                socket.send(identifier);
+                socket.send(self.identifier);
             };
             
             socket.onerror = (error) => {
@@ -329,8 +329,12 @@ class NativePushStreamChannel {
     
     handleIncomingData(event) {
         if(this.handler) {
-            this.handler(event);
+            this.handler(event.data);
         }
+    }
+    
+    close() {
+        this.socket.close();
     }
 }
 
@@ -338,14 +342,17 @@ class NativePushStreamAPI {
     constructor(origin, name) {
         this.origin = origin;
         this.apiName = name;
+        this.openedChannels = [];
         const openURL = `${origin}/pushStream/open/${name}`;
-        this.openCall = new NativeApiCall(openURL)
+        const closeURL = `${origin}/pushStream/close/${name}`;
+        this.openCall = new NativeApiCall(openURL);
+        this.closeCall = new NativeApiCall(closeURL);
     }
     
-    openStream() {
+    openStream(options) {
         let self = this;
         return new Promise((resolve, reject) => {
-            self.openCall().then((resultArray) => {
+            self.openCall(options).then((resultArray) => {
                 resolve();
             }, (error) => {
                 reject(error);
@@ -353,19 +360,28 @@ class NativePushStreamAPI {
         });
     }
     
-    openChannel(channelName) {
+    openChannel(channelName,options) {
         const openChannelURL = `${this.origin}/pushStream/connect/${this.apiName}/${channelName}`;
         let openChannelCall = new NativeApiCall(openChannelURL);
+        const self = this;
         return new Promise((resolve, reject) => {
-            openChannelCall().then((resultArray) => {
+            openChannelCall(options).then((resultArray) => {
                 const wsURL = resultArray[0];
                 const wsID = resultArray[1];
                 const channel = new NativePushStreamChannel(wsURL, wsID);
                 channel.connect().then(resolve, reject);
+                self.openedChannels.push(channel);
             }, (error) => {
                 reject(error);
             });
         });
+    }
+    
+    closeStream() {
+        this.closeCall();
+        this.openedChannels.forEach((item) => {
+            item.close();
+        })
     }
 }
 
