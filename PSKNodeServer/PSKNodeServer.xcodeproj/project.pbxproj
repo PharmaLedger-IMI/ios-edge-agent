@@ -22,6 +22,9 @@
 		0BCFE0AF25AD9DA4003F7BC2 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0BCFE0AD25AD9DA4003F7BC2 /* Localizable.strings */; };
 		0BCFE0B725B0975E003F7BC2 /* ApplicationCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BCFE0B625B0975E003F7BC2 /* ApplicationCore.swift */; };
 		8A171D07279464C600A302BE /* PhotoCaptureStreamAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A171D06279464C600A302BE /* PhotoCaptureStreamAPI.swift */; };
+		8A2344B1287B0F8B00EA7EE7 /* Int+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A2344B0287B0F8B00EA7EE7 /* Int+Utilities.swift */; };
+		8A2344B2287B0F8B00EA7EE7 /* Int+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A2344B0287B0F8B00EA7EE7 /* Int+Utilities.swift */; };
+		8A2344B3287B0F8B00EA7EE7 /* Int+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A2344B0287B0F8B00EA7EE7 /* Int+Utilities.swift */; };
 		8A2C70C0278E0D50003547EF /* Module.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A2C70BF278E0D50003547EF /* Module.swift */; };
 		8A5AE9E9286BAC36008FE41C /* nativePageDemo in Resources */ = {isa = PBXBuildFile; fileRef = 8A5AE9E8286BAC36008FE41C /* nativePageDemo */; };
 		8A5AE9EA286BAC36008FE41C /* nativePageDemo in Resources */ = {isa = PBXBuildFile; fileRef = 8A5AE9E8286BAC36008FE41C /* nativePageDemo */; };
@@ -343,6 +346,7 @@
 		0BF91AEE2542058A001A9031 /* EPI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EPI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0BFBD24E259518ED009EACAF /* nodejsProject */ = {isa = PBXFileReference; lastKnownFileType = folder; path = nodejsProject; sourceTree = "<group>"; };
 		8A171D06279464C600A302BE /* PhotoCaptureStreamAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureStreamAPI.swift; sourceTree = "<group>"; };
+		8A2344B0287B0F8B00EA7EE7 /* Int+Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+Utilities.swift"; sourceTree = "<group>"; };
 		8A2C70BF278E0D50003547EF /* Module.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Module.swift; sourceTree = "<group>"; };
 		8A5AE9E8286BAC36008FE41C /* nativePageDemo */ = {isa = PBXFileReference; lastKnownFileType = folder; path = nativePageDemo; sourceTree = "<group>"; };
 		8A5AE9EC286BB614008FE41C /* NumberPushStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberPushStream.swift; sourceTree = "<group>"; };
@@ -531,6 +535,7 @@
 				8AD5387E2793144F00F28A81 /* ArrayUtilities.swift */,
 				8AE46F1C27B6CD7E0048B476 /* ImageConversionUtilities.swift */,
 				8AFBAE3A2872384D006CF959 /* Data+Utilities.swift */,
+				8A2344B0287B0F8B00EA7EE7 /* Int+Utilities.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -948,6 +953,7 @@
 				8A5AE9ED286BB614008FE41C /* NumberPushStream.swift in Sources */,
 				8AA1B54C27A9E9EF00A1D454 /* SymbologyExtension.swift in Sources */,
 				8A2C70C0278E0D50003547EF /* Module.swift in Sources */,
+				8A2344B1287B0F8B00EA7EE7 /* Int+Utilities.swift in Sources */,
 				8A84B45F27975DD10063355C /* VideoCaptureSessionModuleBuilders.swift in Sources */,
 				8A8832F1278C977B00FFB63C /* NodeRunner.mm in Sources */,
 				8A84B45B27973DC50063355C /* CameraFrameCaptureModuleInput.swift in Sources */,
@@ -1006,6 +1012,7 @@
 				8A5AE9EE286BB614008FE41C /* NumberPushStream.swift in Sources */,
 				8AA1B54D27A9E9EF00A1D454 /* SymbologyExtension.swift in Sources */,
 				8A83E40F27A861D000176C53 /* Module.swift in Sources */,
+				8A2344B2287B0F8B00EA7EE7 /* Int+Utilities.swift in Sources */,
 				8A83E41027A861D000176C53 /* VideoCaptureSessionModuleBuilders.swift in Sources */,
 				8A83E41127A861D000176C53 /* NodeRunner.mm in Sources */,
 				8A83E41227A861D000176C53 /* CameraFrameCaptureModuleInput.swift in Sources */,
@@ -1064,6 +1071,7 @@
 				8A5AE9EF286BB614008FE41C /* NumberPushStream.swift in Sources */,
 				8AC08A6C28285B0F0050B99B /* SymbologyExtension.swift in Sources */,
 				8AC08A6D28285B0F0050B99B /* Module.swift in Sources */,
+				8A2344B3287B0F8B00EA7EE7 /* Int+Utilities.swift in Sources */,
 				8AC08A6E28285B0F0050B99B /* VideoCaptureSessionModuleBuilders.swift in Sources */,
 				8AC08A6F28285B0F0050B99B /* NodeRunner.mm in Sources */,
 				8AC08A7028285B0F0050B99B /* CameraFrameCaptureModuleInput.swift in Sources */,

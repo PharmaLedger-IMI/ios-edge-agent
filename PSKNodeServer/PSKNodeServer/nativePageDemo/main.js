@@ -26,9 +26,9 @@ window.onload = (event) => {
                printDebug("API READY");
 
             const numberStream = bridge.importNativePushStreamAPI("photoCapturePushStream");
-               numberStream.openStream().then(() => {
+               numberStream.openStream(["bgra", 5]).then(() => {
                    printDebug("Number stream opened");
-                   numberStream.openChannel("whatever").then((channel) => {
+                   numberStream.openChannel("main").then((channel) => {
                       printDebug("CHANNEL OPENED");
                        channel.setNewEventHandler((arrayBuffer) => {
                            drawData(arrayBuffer);

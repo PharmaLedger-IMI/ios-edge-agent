@@ -26,13 +26,23 @@ extension PhotoCapturePushStreamAPI: PushStreamAPIImplementation {
             return
         }
         
-        let mainChannel = MainChannel(frameCaptureModuleInput: frameCaptureModuleInput, captureType: options.captureType)
+        let mainChannel = MainChannel(frameCaptureModuleInput: frameCaptureModuleInput,
+                                      captureOptions: options)
         self.mainChannel = mainChannel
         completion(.success(mainChannel))
     }
     
     func openStream(input: [APIValue], _ completion: @escaping (Result<Void, APIError>) -> Void) {
-        options = .init(apiValue: input.first) ?? .init(captureType: .bgra)
+        options = {
+            guard input.count >= 2,
+                  case .string(let stringValue) = input[0],
+                  let captureType = PhotoCaptureType(rawValue: stringValue),
+                  case .number(let numberValue) = input[1],
+                  numberValue > 0 else {
+                      return .init(captureType: .rgba, fps: 10)
+                  }
+            return .init(captureType: captureType, fps: .init(numberValue))
+        }()
         
         let pixelFormat: CameraFrameCapture.PixelFormat = {
             switch options.captureType {
@@ -60,19 +70,20 @@ extension PhotoCapturePushStreamAPI: PushStreamAPIImplementation {
 
 private extension PhotoCapturePushStreamAPI {
     final class MainChannel: PushStreamChannel {
+        private var timer: Timer?
         private let frameCaptureModuleInput: CameraFrameCaptureModuleInput
-        private let captureType: PhotoCaptureType
+        private let captureOptions: CaptureOptions
         private var dataListener: PushStreamChannelDataListener?
         
         init(frameCaptureModuleInput: CameraFrameCaptureModuleInput,
-             captureType: PhotoCaptureType) {
+             captureOptions: CaptureOptions) {
             self.frameCaptureModuleInput = frameCaptureModuleInput
-            self.captureType = captureType
+            self.captureOptions = captureOptions
         }
         
         func setDataListener(_ listener: @escaping PushStreamChannelDataListener) {
             dataListener = listener
-            switch captureType {
+            switch captureOptions.captureType {
             case .jpegBase64:
                 beginRetrievingJPEGBase64()
             case .rgba:
@@ -108,34 +119,35 @@ private extension PhotoCapturePushStreamAPI {
         }
         
         private func beginRetrievingBGRAFrames(bufferProcessing: @escaping (CVImageBuffer) -> UnsafeMutableRawPointer?) {
-            var count = 0
-            frameCaptureModuleInput.setCaptureFrameHandler(handler: { [weak self] in
-                switch $0 {
-                case .success(let imageBuffer):
-                    guard count > 10,
-                          let buffer = bufferProcessing(imageBuffer) else {
-//                        into(.failure(.init(code: CameraFrameCapture
-//                                                .FrameCaptureError
-//                                                .frameCaptureFailure(nil)
-//                                                .code
-//                                           )))
-                        count += 1
-                        return
+            timer = Timer.scheduledTimer(withTimeInterval: captureOptions.fps.frameDuration,
+                                         repeats: true,
+                                         block: { [weak self] _ in
+                self?.frameCaptureModuleInput.setCaptureFrameHandler(handler: { [weak self] in
+                    switch $0 {
+                    case .success(let imageBuffer):
+                        guard let buffer = bufferProcessing(imageBuffer) else {
+    //                        into(.failure(.init(code: CameraFrameCapture
+    //                                                .FrameCaptureError
+    //                                                .frameCaptureFailure(nil)
+    //                                                .code
+    //                                           )))
+                            return
+                        }
+                        
+                        let data = Data(bytesNoCopy: buffer,
+                                        count: imageBuffer.byteCount,
+                                        deallocator: .free)
+                        
+                        self?.dataListener?(.from(value: Int32(imageBuffer.rgba8888Width)), false)
+                        self?.dataListener?(.from(value: Int32(imageBuffer.height)), false)
+                        self?.dataListener?(data, true)
+                    case .failure(let error):
+    //                    into(.failure(.init(code: error.code)))
+                        break
                     }
-                    
-                    count = 0
-                    let data = Data(bytesNoCopy: buffer,
-                                    count: imageBuffer.byteCount,
-                                    deallocator: .free)
-                    
-                    self?.dataListener?(.from(value: Int32(imageBuffer.rgba8888Width)), false)
-                    self?.dataListener?(.from(value: Int32(imageBuffer.height)), false)
-                    self?.dataListener?(data, true)
-                case .failure(let error):
-//                    into(.failure(.init(code: error.code)))
-                    break
-                }
-            }, isContinuous: true)
+                }, isContinuous: false)
+            })
+            
         }
         
     }
