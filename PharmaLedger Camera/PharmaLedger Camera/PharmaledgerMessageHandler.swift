@@ -328,6 +328,63 @@ public class PharmaledgerMessageHandler: NSObject, CameraEventListener {
         return (data, self.previewWidth, previewHeight)
     }
     
+    public func getRawFrame(roi: CGRect?) -> (data: Data, width: CGFloat, height: CGFloat)? {
+        if let ciImage = self.currentCIImage {
+            let data = self.prepareRGBData(ciImage: ciImage, roi: roi)
+            let imageSize: CGSize = roi?.size ?? ciImage.extent.size
+            return (data, imageSize.width, imageSize.height)
+        }
+        
+        return nil
+    }
+    
+    public func getRawFrameYCBCR(roi: CGRect?) -> (data: Data, width: Int, height: Int)? {
+        if let ciImage = self.currentCIImage {
+            let data = self.prepare420Yp8_CbCr8Data(ciImage: ciImage, roi: roi)
+            let imageSize: CGSize = roi?.size ?? ciImage.extent.size
+            return (data, Int(imageSize.width), Int(imageSize.height))
+        }
+        return nil
+    }
+    
+    public func gePreviewFrame() -> (data: Data, width: Int, height: Int)? {
+        if let ciImage = self.currentCIImage {
+            return self.preparePreviewData(ciImage: ciImage)
+        }
+        return nil
+    }
+    
+    public func getJPEGSnapshot(completion: @escaping (Data?) -> Void) {
+        DispatchQueue.global().async {
+            let semaphore = DispatchSemaphore(value: 0)
+            let photoSettings = AVCapturePhotoSettings()
+            photoSettings.isHighResolutionPhotoEnabled = true
+            guard let flashMode = self.cameraSession?.getConfig()?.getFlashMode() else {
+                completion(nil)
+                return
+            }
+            photoSettings.flashMode = flashMode
+            let processor = CaptureProcessor(completion: {data in
+                completion(data)
+                semaphore.signal()
+            })
+            guard let photoOutput = self.cameraSession?.getPhotoOutput() else {
+                completion(nil)
+                return
+            }
+            photoOutput.capturePhoto(with: photoSettings, delegate: processor)
+            _ = semaphore.wait(timeout: DispatchTime.now().advanced(by: DispatchTimeInterval.seconds(10)))
+        }
+    }
+    
+    public func getCameraConfig() -> [String: Any] {
+        cameraConfiguration?.toDict() ?? [:]
+    }
+    
+    public func getDeviceInfo() -> [String: Any] {
+        UIDevice.getDeviceInfo()
+    }
+    
     // MARK: webserver endpoints definitions
     private func addWebserverHandlers(webserver: GCDWebServer) {
         webserver.addHandler(forMethod: "GET", path: "/mjpeg", request: GCDWebServerRequest.classForCoder(), asyncProcessBlock: {(request, completion) in

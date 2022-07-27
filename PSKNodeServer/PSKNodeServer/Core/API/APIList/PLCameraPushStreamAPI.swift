@@ -1,8 +1,8 @@
 //
-//  PLCameraAPI.swift
+//  PLCameraPushStreamAPI.swift
 //  PSKNodeServer
 //
-//  Created by Costin Andronache on 13.03.2022.
+//  Created by Costin Andronache on 28.07.2022.
 //
 
 import Foundation
@@ -10,7 +10,7 @@ import PSSmartWalletNativeLayer
 import PharmaLedgerCamera
 import GCDWebServers
 
-struct PLCameraAPI: StreamAPIImplementation {
+struct PLCameraPushStreamAPI: StreamAPIImplementation {
     private let messageHandler: PharmaledgerMessageHandler = .init()
     private let webServer: GCDWebServer
     private var cameraServerHost: String {
@@ -80,42 +80,23 @@ struct PLCameraAPI: StreamAPIImplementation {
     func close() { }
 }
 
-enum ErrorCodes {
-    static let cameraServerStartFailure = "PLCAMERAAPI_SERVER_START_FAILURE"
-    static let messageDecodingFailure = "PLCAMERAAPI_MESSAGE_DECODE_FAILURE"
-    static let cameraPermissionDenided = "PLCAMERAAPI_CAMERA_PERMISSION_DENIED"
-}
-
-struct PLCameraMessage {
-    let name: PharmaledgerMessageHandler.MessageName
-    let args: [String: Any]
+private class MainChannel: PushStreamChannel {
+    private let messageHandler: PharmaledgerMessageHandler
+    private var listener: PushStreamChannelDataListener?
     
-    init?(encodedJSON: String) {
-        guard let data = encodedJSON.data(using: .ascii),
-              let dict = try? JSONSerialization.jsonObject(with: data,
-                                                           options: []) as? [String: Any] else {
-                  return nil
-              }
-        
-        guard let nameRaw = dict["name"] as? String,
-              let name = PharmaledgerMessageHandler.MessageName(rawValue: nameRaw) else {
-                  return nil
-              }
-        
-        let args = dict["args"] as? [String: Any] ?? [:]
-        
-        self.name = name
-        self.args = args
+    init(messageHandler: PharmaledgerMessageHandler) {
+        self.messageHandler = messageHandler
     }
-}
-
-extension APIValue {
-    var stringCaseValue: String? {
-        switch self {
-        case .string(let value):
-            return value
-        default:
-            return nil
-        }
+    
+    func setDataListener(_ listener: @escaping PushStreamChannelDataListener) {
+        self.listener = listener
+    }
+    
+    func handlePeerData(_ data: Data) {
+        
+    }
+    
+    func close() {
+        
     }
 }

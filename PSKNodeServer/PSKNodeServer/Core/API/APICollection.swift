@@ -26,14 +26,16 @@ extension APICollection {
         /* This is the main function where each native API may be constructed/initialized */
         
         let dataMatrixAPI = setupDataMatrixScanAPI(viewControllerProvider: viewControllerProvider())
-        
         let scanditScanAPI = setupScanditScanAPI(viewControllerProvider: viewControllerProvider())
+        let jailbreakHeuristics = JailbreakHeuristics()
+        
         let photoCaptureStreamAPI = setupPhotoCaptureStreamAPI()
         let photoCapturePushStreamAPI = setupPhotoCapturePushStreamAPI()
         let pharmaLedgerCameraAPI = PLCameraAPI(webServer: webServer)
         
         return APICollection(apiList: [("dataMatrixScan", dataMatrixAPI),
-                                       ("scanditScan", scanditScanAPI)],
+                                       ("scanditScan", scanditScanAPI),
+                                       ("jailbreakHeuristics", jailbreakHeuristics)],
                              streamAPIList: [("photoCaptureStream", photoCaptureStreamAPI),
                                              ("pharmaLedgerCameraAPI", pharmaLedgerCameraAPI)],
                              pushStreamAPIList: [("numbers", NumberPushStream()),
