@@ -32,6 +32,7 @@ extension APICollection {
         let photoCaptureStreamAPI = setupPhotoCaptureStreamAPI()
         let photoCapturePushStreamAPI = setupPhotoCapturePushStreamAPI()
         let pharmaLedgerCameraAPI = PLCameraAPI(webServer: webServer)
+        let pharmaLedgerCameraPushStreamAPI = PLCameraPushStreamAPI()
         
         return APICollection(apiList: [("dataMatrixScan", dataMatrixAPI),
                                        ("scanditScan", scanditScanAPI),
@@ -39,7 +40,8 @@ extension APICollection {
                              streamAPIList: [("photoCaptureStream", photoCaptureStreamAPI),
                                              ("pharmaLedgerCameraAPI", pharmaLedgerCameraAPI)],
                              pushStreamAPIList: [("numbers", NumberPushStream()),
-                                                 ("photoCapturePushStream", photoCapturePushStreamAPI)])
+                                                 ("photoCapturePushStream", photoCapturePushStreamAPI),
+                                                 ("pharmaLedgerCameraPushStreamAPI", pharmaLedgerCameraPushStreamAPI)])
     }
 }
 

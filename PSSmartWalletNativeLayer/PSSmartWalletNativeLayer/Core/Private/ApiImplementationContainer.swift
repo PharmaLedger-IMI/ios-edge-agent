@@ -74,9 +74,12 @@ final class ImplementationContainer {
                 return
             }
             
-            channel.setDataListener({ [weak conn] in
+            channel.setListeners({ [weak conn] in
                 conn?.send(data: $0, isComplete: $1)
+            }, { [weak conn] in
+                conn?.send(ascii: $0, isComplete: $1)
             })
+            
             conn.didReceive = { [weak channel] in
                 channel?.handlePeerData($0)
             }

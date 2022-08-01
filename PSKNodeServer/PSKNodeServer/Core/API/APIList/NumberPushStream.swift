@@ -34,8 +34,9 @@ private extension NumberPushStream {
             data.replaceSubrange(data.startIndex..<data.endIndex, with: .init(dataPtr))
         }
         
-        func setDataListener(_ listener: @escaping PushStreamChannelDataListener) {
-            dataListener = listener
+        func setListeners(_ dataListener: @escaping PushStreamChannelDataListener,
+                          _ asciiListener: @escaping PushStreamChannelDataASCIIListener) {
+            self.dataListener = dataListener
             launchNewStream()
         }
         

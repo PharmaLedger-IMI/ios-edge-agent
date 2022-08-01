@@ -16,7 +16,7 @@ enum PhotoCaptureType: String, Decodable {
 
 struct CaptureOptions: Decodable {
     let captureType: PhotoCaptureType
-    let fps: Int
+    let fps: Int?
     static let defaultOptions = Self(captureType: .jpegBase64)
     
     init(captureType: PhotoCaptureType,

@@ -75,8 +75,10 @@ public struct AuthorizationCookie {
 
 //
 public typealias PushStreamChannelDataListener = (Data, _ isComplete: Bool) -> Void
+public typealias PushStreamChannelDataASCIIListener = (String, _ isComplete: Bool) -> Void
 public protocol PushStreamChannel: AnyObject {
-    func setDataListener(_ listener: @escaping PushStreamChannelDataListener)
+    func setListeners(_ dataListener: @escaping PushStreamChannelDataListener,
+                      _ asciiListener: @escaping PushStreamChannelDataASCIIListener)
     func handlePeerData(_ data: Data)
     func close()
 }

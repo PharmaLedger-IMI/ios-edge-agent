@@ -85,8 +85,9 @@ private extension PhotoCapturePushStreamAPI {
             self.captureOptions = captureOptions
         }
         
-        func setDataListener(_ listener: @escaping PushStreamChannelDataListener) {
-            dataListener = listener
+        func setListeners(_ dataListener: @escaping PushStreamChannelDataListener,
+                          _ asciiListener: @escaping PushStreamChannelDataASCIIListener) {
+            self.dataListener = dataListener
             switch captureOptions.captureType {
             case .jpegBase64:
                 beginRetrievingJPEGBase64()
@@ -96,13 +97,14 @@ private extension PhotoCapturePushStreamAPI {
                 beginRetrievingBGRAFrames(bufferProcessing: { $0.copyBGRABuffer() })
             }
         }
-        
+                
         func handlePeerData(_ data: Data) {
             // unhandled here
         }
         
         func close() {
             timer?.invalidate()
+            frameCaptureModuleInput.cancelFrameCapture()
         }
         
         private func beginRetrievingJPEGBase64() {
@@ -123,7 +125,7 @@ private extension PhotoCapturePushStreamAPI {
         }
         
         private func beginRetrievingBGRAFrames(bufferProcessing: @escaping (CVImageBuffer) -> UnsafeMutableRawPointer?) {
-            timer = Timer.scheduledTimer(withTimeInterval: captureOptions.fps.frameDuration,
+            timer = Timer.scheduledTimer(withTimeInterval: captureOptions.fps?.frameDuration ?? 10,
                                          repeats: true,
                                          block: { [weak self] _ in
                 self?.frameCaptureModuleInput.setCaptureFrameHandler(handler: { [weak self] in
