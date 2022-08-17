@@ -68,27 +68,6 @@ extension UnsafeMutableRawPointer {
                                        rowBytes: rowBytes)
         
         let permuteMap: [UInt8] = [2, 1, 0, 3]
-        /*
-         Although having `ARGB8888` in the function name,
-         the contents of the buffer need not necessarily be actual pixels of an
-         image, as long as it respects the alignment & size of an UInt32 array.
-         As a side note, the identity permute map i.e. one that doesn't alter
-         the order of bytes is [0, 1, 2, 3] and a permute map which reverses the
-         order is [3, 2, 1, 0]
-         
-         To reorder the 4 bytes of a BGRA integer into RGBA the obvious
-         permute map would be [2, 1, 0, 3]
-         
-         But what Apple doesn't state in their documentation is that
-         this vImagePermuteChannels_ARGB8888 interprets the permute indices
-         according to the little/big -endianness of the system.
-         
-         So on ARM devices with LE ordering the indexing of a BGRA pixel
-         actually starts from the Alpha byte, [0 -> A, 1 -> R, 2 -> G, 3 -> B]
-         but the bytes are still stored in the B-G-R-A order in the memory.
-         This results in a the following permute map for ARM devices: [0, 3, 2, 1]
-         */
-        
         vImagePermuteChannels_ARGB8888(&src,
                                        &src,
                                        permuteMap,

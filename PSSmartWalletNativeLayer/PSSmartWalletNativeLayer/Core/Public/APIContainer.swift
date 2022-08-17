@@ -88,6 +88,11 @@ public class APIContainer {
                                                  implementation: implementation)
     }
     
+    public func addPushStreamAPI(name: String, implementation: PushStreamAPIImplementation) throws {
+        try implementationContainer.addPushStreamAPI(name: name,
+                                                     implementation: implementation)
+    }
+    
     public func addDataStreamAPI(name: String, implementation: @escaping DataStreamAPIImplementation) throws {
         try implementationContainer.addDataStreamAPI(name: name, implementation: implementation)
     }

@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct NetworkUtilities {
-    static func findFreePort() -> UInt16? {
+public struct NetworkUtilities {
+    public static func findFreePort() -> UInt16? {
         let serverFD = socket(AF_INET, SOCK_STREAM, 0)
         guard serverFD != 0 else {
             return nil
@@ -43,7 +43,7 @@ struct NetworkUtilities {
         }
     }
     
-    static func executeWhenUrlAvilable(url: URL, job: @escaping () -> Void) {
+    public static func executeWhenUrlAvilable(url: URL, job: @escaping () -> Void) {
         Thread {
             while true {
                 if let _ = try? Data(contentsOf: url) {
@@ -55,7 +55,7 @@ struct NetworkUtilities {
         }.start()
     }
     
-    static func isBigEndian() -> Bool {
+    public static func isBigEndian() -> Bool {
         let randomNumber = 0x12345678
         if randomNumber == randomNumber.bigEndian {
             return true

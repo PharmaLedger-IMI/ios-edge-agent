@@ -332,21 +332,14 @@ class NativePushStreamChannel {
             this.handler(event.data);
         }
     }
-    
-    close() {
-        this.socket.close();
-    }
 }
 
 class NativePushStreamAPI {
     constructor(origin, name) {
         this.origin = origin;
         this.apiName = name;
-        this.openedChannels = [];
         const openURL = `${origin}/pushStream/open/${name}`;
-        const closeURL = `${origin}/pushStream/close/${name}`;
-        this.openCall = new NativeApiCall(openURL);
-        this.closeCall = new NativeApiCall(closeURL);
+        this.openCall = new NativeApiCall(openURL)
     }
     
     openStream(options) {
@@ -363,25 +356,16 @@ class NativePushStreamAPI {
     openChannel(channelName,options) {
         const openChannelURL = `${this.origin}/pushStream/connect/${this.apiName}/${channelName}`;
         let openChannelCall = new NativeApiCall(openChannelURL);
-        const self = this;
         return new Promise((resolve, reject) => {
             openChannelCall(options).then((resultArray) => {
                 const wsURL = resultArray[0];
                 const wsID = resultArray[1];
                 const channel = new NativePushStreamChannel(wsURL, wsID);
                 channel.connect().then(resolve, reject);
-                self.openedChannels.push(channel);
             }, (error) => {
                 reject(error);
             });
         });
-    }
-    
-    closeStream() {
-        this.closeCall();
-        this.openedChannels.forEach((item) => {
-            item.close();
-        })
     }
 }
 

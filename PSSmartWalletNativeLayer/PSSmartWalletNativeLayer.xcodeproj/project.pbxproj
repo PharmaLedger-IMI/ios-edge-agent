@@ -31,9 +31,13 @@
 		0B16AD662550A6C5005821F7 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B16AD652550A6C5005821F7 /* SystemConfiguration.framework */; };
 		0B16AD702550A722005821F7 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B16AD6F2550A722005821F7 /* CoreServices.framework */; };
 		0BA02F0B254A03F90032FC96 /* ApiImplementationContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA02F0A254A03F90032FC96 /* ApiImplementationContainer.swift */; };
+		8A5AE9E7286B9BA9008FE41C /* NetworkUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5AE9E6286B9BA9008FE41C /* NetworkUtilities.swift */; };
 		8A707BC5278579F1002646A0 /* DataStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A707BC4278579F1002646A0 /* DataStorage.swift */; };
 		8A7C28E2276F79D7001E7DBA /* GCDWebServers.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A7C28E1276F79D7001E7DBA /* GCDWebServers.xcframework */; };
 		8AA4DE72277DFF1A0047DA4B /* InternalDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA4DE71277DFF1A0047DA4B /* InternalDefinitions.swift */; };
+		8AFC49D028627FDF00D98B64 /* PushStreamAPIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFC49CF28627FDF00D98B64 /* PushStreamAPIContainer.swift */; };
+		8AFC49D32862825B00D98B64 /* WebSocketConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFC49D22862825B00D98B64 /* WebSocketConnection.swift */; };
+		8AFC49D52862845E00D98B64 /* WebSocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFC49D42862845E00D98B64 /* WebSocketServer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,9 +66,13 @@
 		0B16AD6F2550A722005821F7 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		0B16AD752550A7FC005821F7 /* Bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Bridge.h; sourceTree = "<group>"; };
 		0BA02F0A254A03F90032FC96 /* ApiImplementationContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiImplementationContainer.swift; sourceTree = "<group>"; };
+		8A5AE9E6286B9BA9008FE41C /* NetworkUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkUtilities.swift; sourceTree = "<group>"; };
 		8A707BC4278579F1002646A0 /* DataStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStorage.swift; sourceTree = "<group>"; };
 		8A7C28E1276F79D7001E7DBA /* GCDWebServers.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = GCDWebServers.xcframework; path = Carthage/Build/GCDWebServers.xcframework; sourceTree = SOURCE_ROOT; };
 		8AA4DE71277DFF1A0047DA4B /* InternalDefinitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InternalDefinitions.swift; sourceTree = "<group>"; };
+		8AFC49CF28627FDF00D98B64 /* PushStreamAPIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushStreamAPIContainer.swift; sourceTree = "<group>"; };
+		8AFC49D22862825B00D98B64 /* WebSocketConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketConnection.swift; sourceTree = "<group>"; };
+		8AFC49D42862845E00D98B64 /* WebSocketServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketServer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -160,6 +168,7 @@
 		8A707BC627858CEE002646A0 /* Public */ = {
 			isa = PBXGroup;
 			children = (
+				8A5AE9E6286B9BA9008FE41C /* NetworkUtilities.swift */,
 				0B003A4E2540BAF3006A66C1 /* Errors.swift */,
 				0B003A522540BF14006A66C1 /* PublicDefinitions.swift */,
 				0B003A442540B7C1006A66C1 /* APIContainer.swift */,
@@ -170,11 +179,22 @@
 		8A707BC727858D04002646A0 /* Private */ = {
 			isa = PBXGroup;
 			children = (
+				8AFC49D12862824500D98B64 /* PushStream */,
 				0BA02F0A254A03F90032FC96 /* ApiImplementationContainer.swift */,
 				8AA4DE71277DFF1A0047DA4B /* InternalDefinitions.swift */,
 				8A707BC4278579F1002646A0 /* DataStorage.swift */,
 			);
 			path = Private;
+			sourceTree = "<group>";
+		};
+		8AFC49D12862824500D98B64 /* PushStream */ = {
+			isa = PBXGroup;
+			children = (
+				8AFC49CF28627FDF00D98B64 /* PushStreamAPIContainer.swift */,
+				8AFC49D22862825B00D98B64 /* WebSocketConnection.swift */,
+				8AFC49D42862845E00D98B64 /* WebSocketServer.swift */,
+			);
+			path = PushStream;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -310,8 +330,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8AFC49D028627FDF00D98B64 /* PushStreamAPIContainer.swift in Sources */,
 				0B003A4F2540BAF3006A66C1 /* Errors.swift in Sources */,
 				0B003A532540BF14006A66C1 /* PublicDefinitions.swift in Sources */,
+				8AFC49D32862825B00D98B64 /* WebSocketConnection.swift in Sources */,
+				8A5AE9E7286B9BA9008FE41C /* NetworkUtilities.swift in Sources */,
+				8AFC49D52862845E00D98B64 /* WebSocketServer.swift in Sources */,
 				0B003A5F2540D474006A66C1 /* Curve25519KeyPair.swift in Sources */,
 				8AA4DE72277DFF1A0047DA4B /* InternalDefinitions.swift in Sources */,
 				0B003A452540B7C1006A66C1 /* APIContainer.swift in Sources */,

@@ -80,13 +80,13 @@ struct PLCameraAPI: StreamAPIImplementation {
     func close() { }
 }
 
-private enum ErrorCodes {
+enum ErrorCodes {
     static let cameraServerStartFailure = "PLCAMERAAPI_SERVER_START_FAILURE"
     static let messageDecodingFailure = "PLCAMERAAPI_MESSAGE_DECODE_FAILURE"
     static let cameraPermissionDenided = "PLCAMERAAPI_CAMERA_PERMISSION_DENIED"
 }
 
-private struct PLCameraMessage {
+struct PLCameraMessage {
     let name: PharmaledgerMessageHandler.MessageName
     let args: [String: Any]
     
@@ -109,7 +109,7 @@ private struct PLCameraMessage {
     }
 }
 
-private extension APIValue {
+extension APIValue {
     var stringCaseValue: String? {
         switch self {
         case .string(let value):
