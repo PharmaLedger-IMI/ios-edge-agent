@@ -197,6 +197,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PROJECT_DIR}/../scripts/preBuild.sh\"\n\"${PROJECT_DIR}/../scripts/buildXCFramework.sh\" \"PharmaLedger Camera.xcodeproj\" \"PharmaLedgerCamera\"\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 

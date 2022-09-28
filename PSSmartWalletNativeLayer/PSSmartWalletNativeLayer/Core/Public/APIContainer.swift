@@ -9,12 +9,10 @@ import Foundation
 import WebKit
 import GCDWebServers
 
-private let maxPortSearched = 9999
 public class APIContainer {
-    
     public enum Mode {
         case withWebApp(WebAppConfiguration)
-        case apiOnly(selectedPort: UInt?)
+        case apiOnly
     }
     
     public struct WebAppConfiguration {
@@ -29,7 +27,6 @@ public class APIContainer {
     
     private let implementationContainer = ImplementationContainer()
     private let webserver: GCDWebServer
-    public let port: UInt
     public var authorizationCookie = AuthorizationCookie(name: "", token: "", origin: "") {
         didSet {
             implementationContainer.authorizationCookie = authorizationCookie
@@ -47,26 +44,12 @@ public class APIContainer {
         self.webserver = webserver
         implementationContainer.setupEndpointIn(server: webserver)
 
-        let startFromPort: (UInt?, GCDWebServer) throws -> UInt = {
-            var port: UInt = $0 ?? 8600
-            while !$1.start(withPort: port, bonjourName: nil) && port < maxPortSearched {
-                port += 1
-            }
-            
-            if port == maxPortSearched {
-                throw Error.noAvailablePort
-            }
-            
-            return port
-        }
-        
         switch mode {
         case .withWebApp(let configuration):
             let basePath = "/web-app/"
             webserver.addGETHandler(forBasePath: basePath, directoryPath: configuration.webAppDirectory, indexFilename: configuration.indexFilename, cacheAge: 3500, allowRangeRequests: true);
-            port = try startFromPort(nil, self.webserver)
-        case .apiOnly(let selectedPort):
-            port = try startFromPort(selectedPort, self.webserver)
+        case .apiOnly:
+            break
         }
         
         webserver.addDefaultHandler(forMethod: "OPTIONS", request: GCDWebServerRequest.classForCoder()) { [weak self] (req) -> GCDWebServerResponse? in

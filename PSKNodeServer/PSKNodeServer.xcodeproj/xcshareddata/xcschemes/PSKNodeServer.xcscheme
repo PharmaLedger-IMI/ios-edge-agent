@@ -5,24 +5,6 @@
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "NO">
-      <PreActions>
-         <ExecutionAction
-            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
-            <ActionContent
-               title = "Run Script"
-               scriptText = "&#10;iOSDeviceDestination=&quot;generic/platform=iOS&quot;&#10;&#10;function callXcodeBuild {&#10;&#10;xcodebuild \&#10;-scheme &quot;$1&quot; \&#10;-destination  &quot;$iOSDeviceDestination&quot; \&#10;SKIP_INSTALL=NO \&#10;BUILD_LIBRARY_FOR_DISTRIBUTION=YES \&#10;OTHER_CFLAGS=&quot;-fembed-bitcode&quot; \&#10;BITCODE_GENERATION_MODE=&quot;bitcode&quot; \&#10;ENABLE_BITCODE=YES&#10;&#10;}&#10;&#10;projectDir=${PROJECT_DIR:-&quot;./../&quot;}&#10;&#10;&quot;$projectDir/../scripts/preBuild.sh&quot; &gt; &quot;$projectDir/PSKNodeServerPreActions.log&quot;&#10;&#10;cd &quot;$projectDir/../PSSmartWalletNativeLayer&quot;&#10;callXcodeBuild &quot;BuildXCFramework_PSSmartWalletNativeLayer&quot;&#10;&#10;cd &quot;$projectDir/../PharmaLedger Camera&quot;&#10;callXcodeBuild &quot;BuildXCFramework_PharmaLedgerCamera&quot;&#10;">
-               <EnvironmentBuildable>
-                  <BuildableReference
-                     BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "0BF91AED2542058A001A9031"
-                     BuildableName = "EPI.app"
-                     BlueprintName = "PSKNodeServer"
-                     ReferencedContainer = "container:PSKNodeServer.xcodeproj">
-                  </BuildableReference>
-               </EnvironmentBuildable>
-            </ActionContent>
-         </ExecutionAction>
-      </PreActions>
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
@@ -63,7 +45,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Script"
-               scriptText = "&quot;${PROJECT_DIR}/../scripts/preBuild.sh&quot;&#10;">
+               scriptText = "&#10;">
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"

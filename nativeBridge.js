@@ -471,7 +471,7 @@ window.opendsu_native_apis = {
             if(err){
                 return callback(err);
             }
-            const connector = new PSSmartWalletNativeLayer(`http://localhost:${nsp}`);
+            const connector = new PSSmartWalletNativeLayer(`http://localhost:${nsp}/nativeApiCall`);
             callback(undefined, connector);
         });
     }

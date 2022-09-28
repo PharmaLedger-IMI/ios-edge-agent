@@ -24,7 +24,7 @@ final class StaticPageViewController: UIViewController {
                                                              viewControllerProvider: self)
         apiContainer = try! ac.setupApiContainer(apiCollection: apiCollection,
                                                  webServer: webServer)
-        setupDemoPage(apiPort: apiContainer!.port)
+        //setupDemoPage(apiPort: apiContainer!.port)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
             let url: URL = .init(string: "http://localhost:\(self.webServer.port)/web-app/index.html")!

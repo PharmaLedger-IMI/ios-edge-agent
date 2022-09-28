@@ -33,7 +33,7 @@ ensureCommandExists() {
 
 ensureCommandExists "carthage"
 
-carthage update --use-xcframeworks --cache-builds
+XCODE_XCCONFIG_FILE="$scriptsDirectory/overrideCheckedOutBuildSettings.xcconfig" carthage update --use-xcframeworks --platform ios
 
 carthageBinariesDirectory="$projDir/Carthage/Build/iOS"
 

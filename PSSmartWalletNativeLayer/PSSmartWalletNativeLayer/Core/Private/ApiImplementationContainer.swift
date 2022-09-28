@@ -90,7 +90,7 @@ final class ImplementationContainer {
     }
     
     private func setupBytesDownloadEndpointIn(server: GCDWebServer) {
-        server.addHandler(forMethod: "GET", path: "/retrieve-resource", request: GCDWebServerRequest.classForCoder()) { [weak self] (request, completion) in
+        server.addHandler(forMethod: "GET", path: "/nativeApiCall/retrieve-resource", request: GCDWebServerRequest.classForCoder()) { [weak self] (request, completion) in
             guard let id = request.query?["id"],
                   let data = self?.dataStorage.removeFrom(id: id),
                   self?.authorizationCookie.verifiedIn(request: request) == true  else {
@@ -102,18 +102,20 @@ final class ImplementationContainer {
     }
     
     private func setupAPICallEndpointIn(server: GCDWebServer) {
-        server.addDefaultHandler(forMethod: "POST", request: GCDWebServerMultiPartFormRequest.classForCoder()) { [weak self] (request, completion) in
+        server.addHandler(forMethod: "POST",
+                                 pathRegex: "\\/nativeApiCall\\/.*",
+                                 request: GCDWebServerMultiPartFormRequest.classForCoder()) { [weak self] (request, completion) in
             guard let multiPartRequest = request as? GCDWebServerMultiPartFormRequest,
                   let callType = self?.determineAPITypeCall(from: multiPartRequest.url),
                   self?.authorizationCookie.verifiedIn(request: request) == true else {
-                      self?.completeWith(error: .noSuchApiError,
-                                         completion: completion)
-                      return
-                  }
-            
+                self?.completeWith(error: .noSuchApiError,
+                                   completion: completion)
+                return
+            }
+
             self?.dispatchAPICall(type: callType,
-                                 arguments: multiPartRequest.arguments.map(\.asAPIValue),
-                                 completion: completion)
+                                  arguments: multiPartRequest.arguments.map(\.asAPIValue),
+                                  completion: completion)
         }
     }
     
@@ -276,7 +278,7 @@ final class ImplementationContainer {
     private func completeWith(values: [APIValue], completion: @escaping GCDWebServerCompletionBlock) {
 
         let jsonArray = values.map({ (value) -> [String: Any] in
-            value.jsonWithMetadata(origin: webServer?.serverOrigin ?? "",
+            value.jsonWithMetadata(origin: "\(webServer?.serverOrigin ?? "")/nativeApiCall",
                                    bytesIdGenerator: { self.dataStorage.insert(data: $0) })
         })
         completion(GCDWebServerDataResponse(jsonObject: ["result": jsonArray])?.applyCORSHeaders(serverOrigin: authorizationCookie.origin))
@@ -290,8 +292,7 @@ private extension AuthorizationCookie {
             return false
         }
         let verified = requestCookie.contains(name) && requestCookie.contains(token)
-        print("COOKIE VERIFIED: \(verified)")
-        return true
+        return verified
     }
 }
 

@@ -12,7 +12,7 @@ import UIKit
 
 class ViewController: UIViewController {
     private let ac = ApplicationCore()
-    private let mainWebServer = GCDWebServer()
+    private let apiContainerServer = GCDWebServer()
     private let webView = WKWebView(frame: .zero, configuration: WKWebViewConfiguration())
     @IBOutlet private var webHostView: PSKWebViewHostView?
     
@@ -21,12 +21,13 @@ class ViewController: UIViewController {
         view.backgroundColor = Configuration.defaultInstance.webviewBackgroundColor
         
         webHostView?.constrain(webView: webView)
-        let apiCollection = APICollection.setupAPICollection(webServer: mainWebServer,
+        loadPreloader()
+        
+        let apiCollection = APICollection.setupAPICollection(webServer: apiContainerServer,
                                                              viewControllerProvider: self)
         
-        
         ac.setupStackWith(apiCollection: apiCollection,
-                          webServer: mainWebServer,
+                          apiContainerServer: apiContainerServer,
                           completion: { [weak self] (result) in
             switch result {
             case .success(let url):
@@ -51,8 +52,17 @@ class ViewController: UIViewController {
                 UIAlertController.okMessage(in: self, message: "\(error.description)\n\("error_final_words".localized)", completion: nil)
             }
         })
-        
-        GCDWebServer.setLogLevel(0)
+    }
+    
+    func loadPreloader() {
+        let loaderPathPart = "nodejsProject/preloader"
+        guard let loaderPath = Bundle.main.path(forResource: loaderPathPart,
+                                                ofType: "html"),
+              let loaderHTML = try? String(contentsOfFile: loaderPath) else {
+            print("DIDNT FIND preloader")
+            return
+        }
+        webView.loadHTMLString(loaderHTML, baseURL: nil)
     }
 
     func loadURL(string: String) {
@@ -63,9 +73,9 @@ class ViewController: UIViewController {
     
     func loadSecureCookieThenRedirect(cookie: AuthorizationCookie,
                                       url: URL) {
-        let webServerURL = URL(string: "http://localhost:\(mainWebServer.port)/initialLoad")
+        let webServerURL = URL(string: "http://localhost:\(apiContainerServer.port)/initialLoad")
         ac.setSecurityCookie(cookie: cookie)
-        mainWebServer.addHandler(forMethod: "GET",
+        apiContainerServer.addHandler(forMethod: "GET",
                                  path: "/initialLoad",
                                  request: GCDWebServerRequest.classForCoder())
         { (request, completion) in

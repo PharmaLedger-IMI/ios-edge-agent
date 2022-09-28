@@ -19,21 +19,29 @@ final class ApplicationCore {
     }
     
     func setupStackWith(apiCollection: APICollection,
-                        webServer: GCDWebServer,
+                        apiContainerServer: GCDWebServer,
                         completion: Completion?,
                         reloadCallback: ReloadCallback?) {
         
         do {
+            let apiContainerPort = try start(webServer: apiContainerServer)
             self.reloadCallback = reloadCallback
             let apiContainer = try setupApiContainer(apiCollection: apiCollection,
-                                                     webServer: webServer)
+                                                     webServer: apiContainerServer)
             self.apiContainer = apiContainer
-            let indexPage = try setupNodeServer(path: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.path, apiContainerPort: apiContainer.port)
+            let nodePort = try setupNodeWithServerFilesInto(directoryPath: FileManager.default.urls(for: .documentDirectory,
+                                                                                                    in: .userDomainMask).first!.path,
+                                                            apiContainerPort: UInt(apiContainerPort))
             
-            NetworkUtilities.executeWhenUrlAvilable(url: indexPage) {
-                completion?(.success(indexPage))
-                self.indexPageURL = indexPage
-            }
+            let nodeURL = URL(string: "http://localhost:\(nodePort)/environment.js")!
+
+            let webAppURL = try! self.setupWebAppServerIntoAPIContainer(webserver: apiContainerServer,
+                                                                        nodePort: nodePort,
+                                                                        apiContainerPort: apiContainerPort)
+            NetworkUtilities.executeWhenUrlAvilable(url: nodeURL, job: {
+                completion?(.success(webAppURL))
+                self.indexPageURL = webAppURL
+            })
             
         } catch let error as ApplicationCore.SetupError {
             completion?(.failure(error))
@@ -41,15 +49,35 @@ final class ApplicationCore {
             completion?(.failure(.unknownError(error)))
         }
     }
+    
+    @discardableResult
+    private func start(webServer: GCDWebServer) throws -> UInt16 {
+        let startFromPort: (UInt16?, GCDWebServer) throws -> UInt16 = {
+            var port: UInt16 = $0 ?? 8600
+            while !$1.start(withPort: UInt(port), bonjourName: nil) && port < 9999 {
+                port += 1
+            }
+            
+            if port == 9999 {
+                throw Error.noAvailablePort
+            }
+            
+            return port
+        }
+        return try startFromPort(NetworkUtilities.findFreePort(), webServer)
+    }
 
-    private func setupNodeServer(path: String, apiContainerPort: UInt) throws -> URL {
+    private func setupNodeWithServerFilesInto(directoryPath: String,
+                                              apiContainerPort: UInt) throws -> UInt16 {
         guard let port = NetworkUtilities.findFreePort() else {
             throw ApplicationCore.SetupError.nodePortSearchFail
         }
         
-        let sourceInstallationFolder = Bundle.main.path(forResource: "nodejsProject", ofType: nil) ?? ""
+        let serverFilesPathPart = "nodejsProject"
+        let sourceInstallationFolder = (Bundle.main.path(forResource: serverFilesPathPart,
+                                                        ofType: nil) ?? "") + "/serverFiles"
         
-        let rootInstallationFolder = "\(path)/nodejsProject"
+        let rootInstallationFolder = "\(directoryPath)/\(serverFilesPathPart)"
         self.rootInstallationFolder = rootInstallationFolder
         
         let fm = FileManager.default
@@ -72,9 +100,9 @@ final class ApplicationCore {
             throw ApplicationCore.SetupError.nspSetupError(error)
         }
         
-        let serverLauncher: String =  "\(path)/nodejsProject/MobileServerLauncher.js"
-        let pskServerPath =  "\(path)/nodejsProject/pskWebServer.js"
-        let apihubRootPath =  "\(path)/nodejsProject/apihub-root"
+        let serverLauncher: String = "\(rootInstallationFolder)/MobileServerLauncher.js"
+        let pskServerPath = "\(rootInstallationFolder)/pskWebServer.js"
+        let apihubRootPath = "\(rootInstallationFolder)/apihub-root"
         
         let env: [String: String] = [
             "PSK_CONFIG_LOCATION": "\(apihubRootPath)/external-volume/config",
@@ -89,17 +117,13 @@ final class ApplicationCore {
                                                    "--env=\(envString)"])
         }.start()
         
-        return URL(string: "http://localhost:\(port)/app/loader/")!
+        return port
     }
     
     func setupApiContainer(apiCollection: APICollection,
                            webServer: GCDWebServer) throws -> APIContainer {
-        guard let port = NetworkUtilities.findFreePort() else {
-            throw ApplicationCore.SetupError.apiContainerPortSearchFail
-        }
-        
         do {
-            let apiContainer = try APIContainer(mode: .apiOnly(selectedPort: UInt(port)),
+            let apiContainer = try APIContainer(mode: .apiOnly,
                                                 webserver: webServer)
             try apiCollection.apiList.forEach {
                 try apiContainer.addAPI(name: $0.name, implementation: $0.impl)
@@ -118,6 +142,126 @@ final class ApplicationCore {
         } catch let error {
             throw ApplicationCore.SetupError.apiContainerSetupFailed(error)
         }
+    }
+    
+    private func handleRedirectionFor(apiContainerPort: UInt16,
+                                      nodePort: UInt16,
+                                      request: GCDWebServerRequest,
+                                      completion: @escaping GCDWebServerCompletionBlock) {
+        let webAppFilesPathPart = "nodejsProject/app"
+        guard let webAppInstallationFolder = Bundle.main.path(forResource: webAppFilesPathPart,
+                                                              ofType: nil) else {
+            completion(nil)
+            return
+        }
+        
+        if request.url.absoluteString.contains("zxing.min") {
+            print(request)
+        }
+        
+        let fm = FileManager.default
+        if request.path == "/nsp" {
+            let response = GCDWebServerDataResponse(text: "\(apiContainerPort)")
+            completion(response)
+            return
+        }
+        
+        if request.path == "/jailbreak/details" {
+            if let suspicions = localizedJailbreakSuspicions() {
+                let response = GCDWebServerDataResponse(text: suspicions)
+                completion(response)
+                return
+            }
+        }
+        
+        let filePath = webAppInstallationFolder + request.path
+        if fm.fileExists(atPath: filePath) {
+            let response = GCDWebServerFileResponse(file: filePath)
+            completion(response)
+        } else {
+            print("NOT FOUND FOR: \(request.url), will redirect")
+            let nodeURL = "http://localhost:\(nodePort)" + request.path
+            var urlRequest = URLRequest(url: URL(string: nodeURL)!)
+            urlRequest.httpMethod = request.method
+            if request.hasBody() {
+                let bodyRequest = request as? GCDWebServerDataRequest
+                urlRequest.httpBody = bodyRequest?.data
+                print("Body length: \(urlRequest.httpBody?.count ?? 0)")
+            }
+            urlRequest.allHTTPHeaderFields = request.headers
+            
+            let task = URLSession.shared.dataTask(with: urlRequest,
+                                                  completionHandler: { data, response, error in
+                let urlResponse = response as! HTTPURLResponse
+                let contentType = urlResponse.value(forHTTPHeaderField: "content-type") ??
+                urlResponse.value(forHTTPHeaderField: "Content-Type") ??
+                "application/octet-stream"
+                let gcdResponse = GCDWebServerDataResponse(data: data!,
+                                                           contentType: contentType)
+                gcdResponse.statusCode = urlResponse.statusCode
+                urlResponse.allHeaderFields.forEach({ key, value in
+                    let keyString = key as! String
+                    let valueString = value as! String
+                    gcdResponse.setValue(valueString, forAdditionalHeader: keyString)
+                })
+                
+                completion(gcdResponse)
+            })
+            task.resume()
+        }
+    }
+    
+    private func addRedirectionPointsInto(webserver: GCDWebServer,
+                                          apiContainerPort: UInt16,
+                                          nodePort: UInt16) {
+        let redirectBlock: GCDWebServerAsyncProcessBlock = { [weak self] request, completion in
+            self?.handleRedirectionFor(apiContainerPort: apiContainerPort,
+                                       nodePort: nodePort,
+                                       request: request,
+                                       completion: completion)
+        }
+        
+        let regexIgnoringAPICalls = "^((?!\\/nativeApiCall).)*$"
+        
+        webserver.addHandler(forMethod: "GET",
+                             pathRegex: regexIgnoringAPICalls,
+                             request: GCDWebServerRequest.classForCoder(),
+                             asyncProcessBlock: redirectBlock)
+        
+        webserver.addHandler(forMethod: "POST",
+                             pathRegex: regexIgnoringAPICalls,
+                             request: GCDWebServerDataRequest.classForCoder(),
+                             asyncProcessBlock: redirectBlock)
+
+        webserver.addHandler(forMethod: "PUT",
+                             pathRegex: regexIgnoringAPICalls,
+                             request: GCDWebServerDataRequest.classForCoder(),
+                             asyncProcessBlock: redirectBlock)
+
+        webserver.addHandler(forMethod: "HEAD",
+                             pathRegex: regexIgnoringAPICalls,
+                             request: GCDWebServerDataRequest.classForCoder(),
+                             asyncProcessBlock: redirectBlock)
+
+        webserver.addHandler(forMethod: "OPTIONS",
+                             pathRegex: regexIgnoringAPICalls,
+                             request: GCDWebServerDataRequest.classForCoder(),
+                             asyncProcessBlock: redirectBlock)
+    }
+    
+    private func setupWebAppServerIntoAPIContainer(webserver: GCDWebServer,
+                                                   nodePort: UInt16,
+                                                   apiContainerPort: UInt16) throws -> URL {
+        addRedirectionPointsInto(webserver: webserver, apiContainerPort: apiContainerPort, nodePort: nodePort)
+        return URL(string: "http://localhost:\(apiContainerPort)/index.html")!
+    }
+    
+    private func setupWebAppServer(webserver: GCDWebServer,
+                                   nodePort: UInt16,
+                                   apiContainerPort: UInt16) throws -> URL {
+        addRedirectionPointsInto(webserver: webserver, apiContainerPort: apiContainerPort, nodePort: nodePort)
+        let port = try start(webServer: webserver)
+        return URL(string: "http://localhost:\(port)/index.html")!
     }
     
     private func setupBackgroundListeners() {
@@ -150,6 +294,15 @@ final class ApplicationCore {
         } catch let error {
             reloadCallback?(.failure(.foregroundRestartError(error)))
         }
+    }
+    
+    private func localizedJailbreakSuspicions() -> String? {
+        let suspicions = JailbreakHeuristics().jailbreakSuspicions()
+        guard !suspicions.isEmpty else {
+            return nil
+        }
+        
+        return suspicions.map(\.localized).joined(separator: "\n")
     }
 }
 

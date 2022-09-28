@@ -9,8 +9,15 @@ import Foundation
 import PSSmartWalletNativeLayer
 
 struct JailbreakHeuristics: APIImplementation {
+    enum Suspicion: Hashable {
+        case containsJailbrokenApps([String])
+        case canWriteToPrivateLocations
+    }
+    
     func perform(_ inputArguments: [APIValue], _ completion: @escaping APIResultCompletion) {
-        let result: [String: Bool] = ["isProbablyJailbroken": isProbablyJailbroken()]
+        let suspicions = jailbreakSuspicions()
+        let result: [String: [String]] = ["jailbreakSuspicions": suspicions.map(\.localized)]
+        
         guard let data = try? JSONEncoder().encode(result),
               let json = String(data: data, encoding: .ascii) else {
                   completion(.failure(APIError(code: "JAILBREAK_RESULT_ENCODING_ERROR")))
@@ -19,9 +26,19 @@ struct JailbreakHeuristics: APIImplementation {
         completion(.success([.string(json)]))
     }
     
-    func isProbablyJailbroken() -> Bool {
-        Self.jailbreakApps.contains(where: isAccessible(path:)) ||
-        canWriteToPrivate()
+    func jailbreakSuspicions() -> Set<Suspicion> {
+        var result = Set<Suspicion>()
+        let apps = Self.jailbreakApps.filter(isAccessible(path:))
+        
+        if !apps.isEmpty {
+            result.insert(.containsJailbrokenApps(apps))
+        }
+        
+        if canWriteToPrivate() {
+            result.insert(.canWriteToPrivateLocations)
+        }
+
+        return result
     }
 }
 
@@ -63,10 +80,7 @@ private extension JailbreakHeuristics {
     static let jailbreakApps: [String] = [
         "/Application/Cydia.app",
         "/Library/MobileSubstrate/MobileSubstrate.dylib",
-        "/bin/bash",
-        "/usr/sbin/sshd",
         "/etc/apt",
-        "/usr/bin/ssh",
         "/private/var/lib/apt",
         "/private/var/lib/cydia",
         "/private/var/tmp/cydia.log",
@@ -75,12 +89,9 @@ private extension JailbreakHeuristics {
         "/private/etc/dpkg/origins/debian",
         "/bin.sh",
         "/private/etc/apt",
-        "/etc/ssh/sshd_config",
-        "/private/etc/ssh/sshd_config",
         "/Applications/SBSetttings.app",
         "/private/var/mobileLibrary/SBSettingsThemes/",
         "/private/var/stash",
-        "/usr/libexec/sftp-server",
         "/usr/libexec/cydia/",
         "/usr/sbin/frida-server",
         "/usr/bin/cycript",
@@ -91,12 +102,25 @@ private extension JailbreakHeuristics {
         "/Applications/FakeCarrier.app",
         "/Library/MobileSubstrate/DynamicLibraries/Veency.plist",
         "/Library/MobileSubstrate/DynamicLibraries/LiveClock.plist",
-        "/usr/libexec/ssh-keysign",
-        "/usr/libexec/sftp-server",
         "/Applications/blackra1n.app",
         "/Applications/IntelliScreen.app",
         "/Applications/Snoop-itConfig.app",
         "/var/checkra1n.dmg",
         "/var/binpack"
     ]
+}
+
+extension JailbreakHeuristics.Suspicion {
+    var localized: String {
+        switch self {
+        case .canWriteToPrivateLocations:
+            return "can_write_private_locations".localized
+        case .containsJailbrokenApps(let apps):
+            guard !apps.isEmpty else {
+                return ""
+            }
+            return String(format: "contains_jailbreak_apps_format".localized,
+                          "\(apps)")
+        }
+    }
 }

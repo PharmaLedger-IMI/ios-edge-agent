@@ -16,3 +16,5 @@
 "web_app_copy_failed" = "Failed to setup the web application.";
 "unknown_error" = "An unknown error occured.";
 "error_final_words" = "Please re-start the app. If the problem persists, please contact the developers";
+"contains_jailbreak_apps_format" = "Several apps which are popular on jailbroken devices: %@";
+"can_write_private_locations" = "The system allows writing into locations which are forbidden to be accessed in regular devices";

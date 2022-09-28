@@ -23,11 +23,11 @@ cp -R "$fullPath" "iphonesimulator/$frameworkDirectoryPart"
 # Look at the architectures in the original binary
 xcrun lipo -i "$fullPath/$frameworkFile"
 
-xcrun lipo -remove i386 "iphoneos/$frameworkDirectoryPart/$frameworkFile" -o "iphoneos/$frameworkDirectoryPart/$frameworkFile"
+# lipo -remove i386 "iphoneos/$frameworkDirectoryPart/$frameworkFile" -o "iphoneos/$frameworkDirectoryPart/$frameworkFile"
 xcrun lipo -remove x86_64 "iphoneos/$frameworkDirectoryPart/$frameworkFile" -o "iphoneos/$frameworkDirectoryPart/$frameworkFile"
 
 xcrun lipo -remove arm64 "iphonesimulator/$frameworkDirectoryPart/$frameworkFile" -o "iphonesimulator/$frameworkDirectoryPart/$frameworkFile"
-xcrun lipo -remove armv7 "iphonesimulator/$frameworkDirectoryPart/$frameworkFile" -o "iphonesimulator/$frameworkDirectoryPart/$frameworkFile"
+#xcrun lipo -remove armv7 "iphonesimulator/$frameworkDirectoryPart/$frameworkFile" -o "iphonesimulator/$frameworkDirectoryPart/$frameworkFile"
 
 
 xcrun lipo -i "iphoneos/$frameworkDirectoryPart/$frameworkFile"
