@@ -93,6 +93,7 @@ final class WebSocketConnection {
     }
 
     func stop() {
+        stop(error: nil)
     }
 
     private func connectionDidFail(error: Swift.Error) {

@@ -287,7 +287,7 @@ final class ApplicationCore {
             try "NEED_RESTART".data(using: .ascii)?.write(to: .init(fileURLWithPath: needServerRestart))
             if let url = indexPageURL {
                 NetworkUtilities.executeWhenUrlAvilable(url: url) {
-                    self.reloadCallback?(.success(()))
+                    self.reloadCallback?(.success(url))
                 }
             }
             
@@ -323,5 +323,5 @@ extension ApplicationCore {
 
 extension ApplicationCore {
     typealias Completion = (Result<URL, SetupError>) -> Void
-    typealias ReloadCallback = (Result<Void, RestartError>) -> Void
+    typealias ReloadCallback = (Result<URL, RestartError>) -> Void
 }

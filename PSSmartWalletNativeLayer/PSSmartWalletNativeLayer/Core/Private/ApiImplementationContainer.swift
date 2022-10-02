@@ -67,7 +67,7 @@ final class ImplementationContainer {
         webServer = server
         setupBytesDownloadEndpointIn(server: server)
         setupAPICallEndpointIn(server: server)
-        websocketServer = .init(portNumber: NetworkUtilities.findFreePort()!)
+        websocketServer = .init()
         websocketServer?.newConnectionInitializedHandler = { [weak self] conn, data in
             guard let channelID = String(data: data, encoding: .ascii),
                   let channel = self?.openedPushStreamChannels[channelID] else {
@@ -79,11 +79,15 @@ final class ImplementationContainer {
             }, { [weak conn] in
                 conn?.send(ascii: $0, isComplete: $1)
             })
-            
+
             conn.didReceive = { [weak channel] in
                 channel?.handlePeerData($0)
             }
-            
+
+            conn.didStopCallback = { [weak channel] _ in
+                channel?.close()
+            }
+
             conn.send(ascii: "READY", isComplete: true)
         }
         try? websocketServer?.start()

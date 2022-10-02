@@ -46,8 +46,12 @@ class ViewController: UIViewController {
             }
         }, reloadCallback: { [weak self] result in
             switch result {
-            case .success:
-                return
+            case .success(let indexPageURL):
+                guard let url = self?.webView.url,
+                      url.relativePath == "/scan" else {
+                    return
+                }
+                self?.webView.load(.init(url: indexPageURL))
             case .failure(let error):
                 UIAlertController.okMessage(in: self, message: "\(error.description)\n\("error_final_words".localized)", completion: nil)
             }

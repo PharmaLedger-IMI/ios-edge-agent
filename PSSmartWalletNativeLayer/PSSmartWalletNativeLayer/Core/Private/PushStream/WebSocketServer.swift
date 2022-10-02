@@ -7,35 +7,40 @@
 
 import Foundation
 import Network
+import UIKit
 
 final class WebSocketServer {
-    let port: NWEndpoint.Port
-    private let listener: NWListener
-    private let parameters: NWParameters
+    private var port: NWEndpoint.Port?
+    private var listener: NWListener?
+    private var parameters: NWParameters?
 
     private var connections: [WebSocketConnection] = []
     var newConnectionInitializedHandler: ((WebSocketConnection, Data) -> Void)?
     
     var wsURL: String {
-        "ws://localhost:\(port)"
+        "ws://localhost:\(port!.rawValue)"
     }
     
-    init(portNumber: UInt16) {
-        self.port = NWEndpoint.Port(rawValue: portNumber)!
-        parameters = NWParameters(tls: nil)
+    init() {
+        setupBackgroundListeners()
+    }
+
+    func start() throws {
+        print("Server starting...")
+        let portNumber = NetworkUtilities.findFreePort()!
+        let port = NWEndpoint.Port(rawValue: portNumber)!
+        self.port = port
+        let parameters = NWParameters(tls: nil)
         parameters.allowLocalEndpointReuse = true
         parameters.includePeerToPeer = true
         let wsOptions = NWProtocolWebSocket.Options()
         wsOptions.autoReplyPing = true
         parameters.defaultProtocolStack.applicationProtocols.insert(wsOptions, at: 0)
-        listener = try! NWListener(using: parameters, on: port)
-    }
-
-    func start() throws {
-        print("Server starting...")
-        listener.stateUpdateHandler = self.stateDidChange(to:)
-        listener.newConnectionHandler = self.didAccept(nwConnection:)
-        listener.start(queue: .main)
+        self.parameters = parameters
+        listener = try NWListener(using: parameters, on: port)
+        listener?.stateUpdateHandler = self.stateDidChange(to:)
+        listener?.newConnectionHandler = self.didAccept(nwConnection:)
+        listener?.start(queue: .main)
     }
 
     func stateDidChange(to newState: NWListener.State) {
@@ -74,8 +79,31 @@ final class WebSocketServer {
     }
 
     private func stop() {
-        self.listener.stateUpdateHandler = nil
-        self.listener.newConnectionHandler = nil
-        self.listener.cancel()
+        listener?.stateUpdateHandler = nil
+        listener?.newConnectionHandler = nil
+        listener?.cancel()
+    }
+    
+    private func restartServerOnForeground() {
+        print("Restarting WEBSOCKET SERVER ON FOREGROUND")
+        stop()
+        connections.forEach({ $0.stop() })
+        do {
+            try start()
+        } catch let error {
+            print("FOREGROUND WEBSOCKET RESTART ERROR: \(error)")
+        }
+    }
+    
+    private func setupBackgroundListeners() {
+        if #available(iOS 13.0, *) {
+            NotificationCenter.default.addObserver(forName: UIScene.willEnterForegroundNotification, object: nil, queue: .main, using: { (_) in
+                self.restartServerOnForeground()
+            })
+        } else {
+            NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main, using: { (_) in
+                self.restartServerOnForeground()
+            })
+        }
     }
 }
