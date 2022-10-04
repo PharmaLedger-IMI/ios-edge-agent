@@ -148,6 +148,7 @@ final class ApplicationCore {
                                       nodePort: UInt16,
                                       request: GCDWebServerRequest,
                                       completion: @escaping GCDWebServerCompletionBlock) {
+        let fm = FileManager.default
         let webAppFilesPathPart = "nodejsProject/app"
         guard let webAppInstallationFolder = Bundle.main.path(forResource: webAppFilesPathPart,
                                                               ofType: nil) else {
@@ -155,11 +156,14 @@ final class ApplicationCore {
             return
         }
         
-        if request.url.absoluteString.contains("zxing.min") {
-            print(request)
+        if request.url.absoluteString.contains("camera.js") {
+            let filePath = webAppInstallationFolder + "/camera.js"
+            let response = GCDWebServerFileResponse(file: filePath)
+            completion(response)
+            return
         }
         
-        let fm = FileManager.default
+        
         if request.path == "/nsp" {
             let response = GCDWebServerDataResponse(text: "\(apiContainerPort)")
             completion(response)
@@ -196,11 +200,15 @@ final class ApplicationCore {
                 let contentType = urlResponse.value(forHTTPHeaderField: "content-type") ??
                 urlResponse.value(forHTTPHeaderField: "Content-Type") ??
                 "application/octet-stream"
+                                
                 let gcdResponse = GCDWebServerDataResponse(data: data!,
                                                            contentType: contentType)
                 gcdResponse.statusCode = urlResponse.statusCode
                 urlResponse.allHeaderFields.forEach({ key, value in
                     let keyString = key as! String
+                    guard !["connection", "keep-alive"].contains(keyString.lowercased()) else {
+                        return
+                    }
                     let valueString = value as! String
                     gcdResponse.setValue(valueString, forAdditionalHeader: keyString)
                 })
