@@ -229,7 +229,7 @@ final class ApplicationCore {
                                        completion: completion)
         }
         
-        let regexIgnoringAPICalls = "^((?!\\/nativeApiCall|\\/previewframe|\\/deviceinfo|\\/rawframe_ycbcr).)*$"
+        let regexIgnoringAPICalls = "^((?!\\/nativeApiCall|\\/previewframe|\\/deviceinfo|\\/rawframe_ycbcr|\\/mjpeg).)*$"
         
         webserver.addHandler(forMethod: "GET",
                              pathRegex: regexIgnoringAPICalls,
